@@ -1,6 +1,8 @@
 #ifndef RESIZEMANAGER_H
 #define RESIZEMANAGER_H
 #include <QSize>
+class QPixmap;
+class QWidget;
 class ResizeManager
 {
 public:
@@ -11,10 +13,14 @@ public:
     float getResizeRate();
     QSize &getClientSize();
     QSize &getImageSize();
+    void setImage(QPixmap *image);
+    void setClient(QWidget *widget);
+    void resize();
 private:
     float resizeRate;
     int resizeMode;
-    void resize();
+    QPixmap *image;
+    QWidget *widget;
 };
 
 #endif // RESIZEMANAGER_H

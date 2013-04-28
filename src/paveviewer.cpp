@@ -6,6 +6,7 @@ PageViewer::PageViewer()
 int PageViewer::setMoveMode(int mode)
 {
     this->moveMode=(MoveMode)mode;
+    return moveMode;
 }
 
 int PageViewer::go(bool start)
