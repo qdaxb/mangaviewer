@@ -9,8 +9,8 @@ class QByteArray;
 class ImagePainter
 {
 public:
-    ImagePainter(QWidget *parent,QPainter* painter);
-    int drawImage();
+    ImagePainter(QPainter* painter);
+    int drawImage(QPixmap &imageData,const QRect &imageRect,QRect &clientRect);
 
 
 private:

@@ -34,11 +34,9 @@ protected:
     void mouseMoveEvent(QMouseEvent *);
 private:
     Ui::MainWindow *ui;
+
     QPainter *painter;
-    QPixmap *current;
-    FileManager *fileManager;
     MsgPainter *msgPainter;
-    ImagePainter *imagePainter;
     void next();
     void previous();
     void openLoadFolderDialog();

@@ -7,10 +7,9 @@
 #include <QDesktopWidget>
 #define debugRect(rect) qDebug()<<"debug "+QString(#rect)<<(rect).left()<<(rect).right()<<(rect).top()<<(rect).bottom();
 #define debugSize(size) qDebug()<<"debug "+QString(#size)<<(size).width()<<(size).height();
-ImagePainter::ImagePainter(QWidget *parent,QPainter *painter)
+ImagePainter::ImagePainter(QPainter *painter)
 {
 
-    this->parent=parent;
     this->painter=painter;
     this->imageData=new QPixmap();
     resizedImageData=NULL;
@@ -250,7 +249,7 @@ int ImagePainter::setMoveMode(int mode)
     this->moveMode=(MoveMode)mode;
 }
 
-int ImagePainter::drawImage()
+int ImagePainter::drawImage(QPixmap &imageData,const QRect &imageRect,QRect &clientRect)
 {
     resize();
     painter->drawPixmap(targetViewRect,(QPixmap&)*(imageData),imageViewRect);

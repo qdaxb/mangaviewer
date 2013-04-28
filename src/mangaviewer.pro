@@ -17,9 +17,10 @@ SOURCES +=\
     rarfile.cpp \
     msgpainter.cpp \
     imagepainter.cpp \
-    viewrect.cpp \
     resizemanager.cpp \
-    imageloader.cpp
+    imageloader.cpp \
+    mangaviewer.cpp \
+    paveviewer.cpp
 
 HEADERS  += mainwindow.h \
     filemanager.h \
@@ -27,9 +28,10 @@ HEADERS  += mainwindow.h \
     rarfile.h \
     msgpainter.h \
     imagepainter.h \
-    viewrect.h \
     resizemanager.h \
-    imageloader.h
+    imageloader.h \
+    mangaviewer.h \
+    pageviewer.h
 
 FORMS    += mainwindow.ui
 
