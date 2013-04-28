@@ -3,19 +3,22 @@
 MangaViewer::MangaViewer()
 {
 }
-MangaViewer::MangaViewer(imagePainter *painter)
+MangaViewer::MangaViewer(QWidget *parent, QPainter *painter)
 {
-    this->imagePainter=painter;
+    this->imagePainter=new ImagePainter(painter);
+    this->fileManager=new FileManager();
+    this->imageLoader=new ImageLoader();
+
 }
 void MangaViewer::setPath(QString path)
 {
-    fileManager.load(path);
-    currentImage=imageLoader.loadImage(fileManager.current());
+    fileManager->load(path);
+    currentImage=imageLoader->loadImage(fileManager->current());
 
 }
 void MangaViewer::draw()
 {
-    resizeManager.resize();
+    //resizeManager->resize();
 
-    imagePainter.drawImage((QPixmap &)*currentImage,pageViewer.getImageViewRect(),pageViewer.getClientRect());
+    imagePainter->drawImage((QPixmap &)*currentImage,pageViewer->getImageViewRect(),pageViewer->getClientRect());
 }

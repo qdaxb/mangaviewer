@@ -1,6 +1,8 @@
 #ifndef VIEWRECT_H
 #define VIEWRECT_H
-
+#include <QPoint>
+#include <QRect>
+#include <QPixmap>
 class PageViewer
 {
 public:

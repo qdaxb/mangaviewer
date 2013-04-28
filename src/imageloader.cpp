@@ -3,7 +3,7 @@
 ImageLoader::ImageLoader()
 {
 }
-QPixmap *loadImage(QString path)
+QPixmap *ImageLoader::loadImage(QString path)
 {
     QPixmap *image=new QPixmap(path);
     return image;

@@ -14,13 +14,14 @@ public:
     void draw();
     void go();
     void back();
+    ResizeManager *getResizeManager();
+    void setResizeMode(ResizeManager::ResizeMode mode,float rate=1);
 private:
     MangaViewer();
     FileManager *fileManager;
     ImageLoader *imageLoader;
     ImagePainter *imagePainter;
     QPixmap *currentImage;
-    ImagePainter *imagePainter;
     ResizeManager *resizeManager;
     PageViewer *pageViewer;
 };

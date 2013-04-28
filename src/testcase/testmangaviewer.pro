@@ -6,8 +6,9 @@ TARGET =testmangaviewer
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    testFileManager.cpp
+    testFileManager.cpp \
+    ../filemanager.cpp
 
 INCLUDEPATH+= ./include ../include ../
 LIBS += -L../../src/testcase/lib -lgtest
-OBJECTS += ../debug/filemanager.o
+

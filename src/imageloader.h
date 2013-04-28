@@ -1,6 +1,7 @@
 #ifndef IMAGELOADER_H
 #define IMAGELOADER_H
 class QPixmap;
+class QString;
 class ImageLoader
 {
 public:

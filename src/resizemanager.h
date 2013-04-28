@@ -1,6 +1,6 @@
 #ifndef RESIZEMANAGER_H
 #define RESIZEMANAGER_H
-
+#include <QSize>
 class ResizeManager
 {
 public:
@@ -9,12 +9,12 @@ public:
     int setResizeMode(ResizeMode mode,float rate=1);
     int getResizeMode();
     float getResizeRate();
-    void resize();
-    QPoint &getClientSize();
-    QPoint &getImageSize();
+    QSize &getClientSize();
+    QSize &getImageSize();
 private:
     float resizeRate;
     int resizeMode;
+    void resize();
 };
 
 #endif // RESIZEMANAGER_H
