@@ -16,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->painter=new QPainter(this);
     this->current=new QPixmap();
     this->fileManager=new FileManager();
-    this->painter=new QPainter(this);
     this->msgPainter=new MsgPainter(this,painter);
     this->msgPainter->setFont(MsgPainter::CENTER,QFont("Arial",14));
     this->imagePainter=new ImagePainter(this,painter);
@@ -25,25 +24,20 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete painter;
+    delete current;
+    delete fileManager;
+    delete msgPainter;
+    delete imagePainter;
 
 }
 
 void MainWindow::paintEvent(QPaintEvent *)
 {
-    // QPainter painter(this);
     painter->begin(this);
-    //painter->drawPixmap(QRect(0,0,this->width(),this->height()),*current,QRect(0,0,this->width(),this->height()));
     imagePainter->drawImage();
     msgPainter->drawMessage();
     painter->end();
-    //painter.setFont(QFont(QString::fromLocal8Bit("宋体"),50,-1,false));
-
-    //QFont font("Times",13);
-    //    painter.setFont(font);
-    //    painter.fillRect(QRect(0,this->height()-16,this->width(),16),Qt::black);
-
-    //    painter.setPen(Qt::white);
-    //   painter.drawText(QRect(0,this->height()-16, this->width(),16),this->fileManager->current());
 
 
 
@@ -58,36 +52,36 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
     case Qt::Key_Space :
     {
-            if(imagePainter->go()==-1)
-            {
-                next();
-            }
-            else
-            {
-                msgPainter->hideMessage(MsgPainter::BOTTOM|MsgPainter::TOP);
-            }
-            this->update();
-            break;
+        if(imagePainter->go()==-1)
+        {
+            next();
+        }
+        else
+        {
+            msgPainter->hideMessage(MsgPainter::BOTTOM|MsgPainter::TOP);
+        }
+        this->update();
+        break;
     }
     case Qt::Key_Backspace :
     {
-            if(imagePainter->back()==-1)
-            {
-                previous();
-            }
-            else
-            {
-                msgPainter->hideMessage(MsgPainter::BOTTOM);
-            }
-            this->update();
-            break;
+        if(imagePainter->back()==-1)
+        {
+            previous();
+        }
+        else
+        {
+            msgPainter->hideMessage(MsgPainter::BOTTOM);
+        }
+        this->update();
+        break;
     }
     case Qt::Key_Up:imagePainter->stepUp(5);this->update();break;
     case Qt::Key_Down:imagePainter->stepDown(5);this->update();break;
     case Qt::Key_Left:imagePainter->stepLeft(5);this->update();break;
     case Qt::Key_Right:imagePainter->stepRight(5);this->update();break;
     case Qt::Key_O:openLoadFolderDialog();this->update();break;
-     case Qt::Key_V:toogleFileMessage();this->update();break;
+    case Qt::Key_V:toogleFileMessage();this->update();break;
     case Qt::Key_1:{
         if(event->modifiers()==Qt::AltModifier)
         {
@@ -139,16 +133,14 @@ void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
-    qDebug()<<"a";
     dragPosition=event->pos();
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
-    qDebug()<<"b";
+
     if(event->buttons()!=Qt::LeftButton)
         return;
-    qDebug()<<"c";
     QPoint newPosition=event->pos();
     imagePainter->stepRight(newPosition.x()-dragPosition.x());
     imagePainter->stepDown(newPosition.y()-dragPosition.y());
@@ -156,7 +148,6 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 }
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-    qDebug()<<"a";
     dragPosition=event->pos();
 }
 
@@ -234,7 +225,7 @@ void MainWindow::toogleHelpMessage()
         helpMessage<<tr("Alt+1-4:scale to rate 0.5-2");
         helpMessage<<tr("`:window fit image alt+`:no fit");
         helpMessage<<tr("f:toggle full screen");
-        msgPainter->setFgColor(MsgPainter::CENTER,Qt::blue);
+        msgPainter->setFgColor(MsgPainter::CENTER,Qt::white);
         msgPainter->showListMessage(helpMessage,MsgPainter::CENTER);
         update();
     }
@@ -255,7 +246,7 @@ void MainWindow::showScaleMessage()
         str.append(tr("window fit image,"));
     }else if(mode & ImagePainter::FIT_WINDOW)
     {
-        if(mode & ImagePainter::FIT_WINDOW==ImagePainter::FIT_WINDOW)
+        if((mode & ImagePainter::FIT_WINDOW)==ImagePainter::FIT_WINDOW)
             str.append(tr("image fit window"));
         else if(mode & ImagePainter::FIT_WINDOW_HEIGHT)
             str.append(tr("image fit window height"));

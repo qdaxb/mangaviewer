@@ -285,12 +285,12 @@ void ImagePainter::resize()
         {
             if(resizeMode&FIT_WINDOW_WIDTH)
             {
-                viewPortSize.scale(imageSize.width(),1,Qt::KeepAspectRatioByExpanding);
+                viewPortSize.scale(imageSize.width(),1,Qt::KeepAspectRatio);
                 this->imageViewRect.setSize(viewPortSize);
             }
             else if(resizeMode&FIT_WINDOW_HEIGHT)
             {
-                viewPortSize.scale(1,imageSize.height(),Qt::KeepAspectRatioByExpanding);
+                viewPortSize.scale(1,imageSize.height(),Qt::KeepAspectRatio);
                 this->imageViewRect.setSize(viewPortSize);
             }
 

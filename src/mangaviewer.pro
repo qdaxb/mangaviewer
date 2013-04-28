@@ -16,14 +16,20 @@ SOURCES +=\
     main.cpp \
     rarfile.cpp \
     msgpainter.cpp \
-    imagepainter.cpp
+    imagepainter.cpp \
+    viewrect.cpp \
+    resizemanager.cpp \
+    imageloader.cpp
 
 HEADERS  += mainwindow.h \
     filemanager.h \
     mainwindow.h \
     rarfile.h \
     msgpainter.h \
-    imagepainter.h
+    imagepainter.h \
+    viewrect.h \
+    resizemanager.h \
+    imageloader.h
 
 FORMS    += mainwindow.ui
 
