@@ -11,8 +11,8 @@ public:
     int setResizeMode(ResizeMode mode,float rate=1);
     int getResizeMode();
     float getResizeRate();
-    QSize &getClientSize();
-    QSize &getImageSize();
+    QSize getClientSize();
+    QSize getImageSize();
     void setImage(QPixmap *image);
     void setClient(QWidget *widget);
     void resize();
@@ -21,6 +21,8 @@ private:
     int resizeMode;
     QPixmap *image;
     QWidget *widget;
+    QSize imageSize;
+    QSize clientSize;
 };
 
 #endif // RESIZEMANAGER_H
