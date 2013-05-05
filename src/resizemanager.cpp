@@ -4,27 +4,33 @@
 ResizeManager::ResizeManager()
 {
 }
-int ResizeManager::setResizeMode(ResizeManager::ResizeMode mode, float rate)
+int ResizeManager::setResizeMode(int resizeMode, float rate)
 {
 
-    if(mode&(0xF))
-    {
-        this->resizeMode=this->resizeMode&(~(0xF));//clear 1111 bit
-    }
+    //    if(mode&(0xF))
+    //    {
+    //        this->resizeMode=this->resizeMode&(~(0xF));//clear 1111 bit
+    //    }
 
-    this->resizeMode=this->resizeMode|mode;
-    if((mode & RATE) || (mode & NO_RATE))
+    //    this->resizeMode=this->resizeMode|mode;
+    this->resizeMode=resizeMode;
+    if(!(resizeMode & (RATE|NO_RATE)))
     {
-        this->resizeMode=this->resizeMode&(~(FIT_WINDOW));//clear fit window bit
+        this->resizeMode = (NO_RATE|this->resizeMode);
     }
-    if(!this->resizeMode&(RATE|NO_RATE))
-        this->resizeMode=this->resizeMode|NO_RATE;
-    if(!this->resizeMode&(0xF))
-        this->resizeMode=this->resizeMode|FIT_IMAGE;
-    if(mode&RATE)
-        this->resizeRate=rate;
-    if(mode&NO_RATE)
-        this->resizeRate=1;
+    //    if((mode & RATE) || (mode & NO_RATE))
+    //    {
+    //        this->resizeMode=this->resizeMode&(~(FIT_WINDOW));//clear fit window bit
+    //    }
+    //    if(!this->resizeMode&(RATE|NO_RATE))
+    //        this->resizeMode=this->resizeMode|NO_RATE;
+    //    if(!this->resizeMode&(0xF))
+    //        this->resizeMode=this->resizeMode|FIT_IMAGE;
+    //    if(mode&RATE)
+    //        this->resizeRate=rate;
+    //    if(mode&NO_RATE)
+    this->resizeRate=rate;
+    return 0;
 }
 int ResizeManager::getResizeMode()
 {
@@ -40,6 +46,8 @@ float ResizeManager::getResizeRate()
 void ResizeManager::resize()
 {
     //resize for fit window
+    imageSize=image->size();
+    clientSize=widget->size();
     int mode=this->resizeMode;
     if(mode&FIT_WINDOW)
     {
@@ -61,15 +69,22 @@ void ResizeManager::resize()
 
 
     }
-    else if(mode & NO_RATE)
+    else if (mode & FIT_IMAGE)
     {
-        //resize for fit image
-        clientSize.scale(imageSize,Qt::IgnoreAspectRatio);
+
+        if(mode & RATE)
+        {
+
+            clientSize.scale(imageSize * resizeRate,Qt::IgnoreAspectRatio);
+        }
+        else
+        {
+            //resize for fit image
+
+            clientSize.scale(imageSize,Qt::IgnoreAspectRatio);
+        }
     }
-    else if(mode & RATE)
-    {
-        clientSize.scale(imageSize * resizeRate,Qt::IgnoreAspectRatio);
-    }
+
     else
     {
         qDebug()<<"error resize mode!!!";
@@ -92,6 +107,7 @@ QSize ResizeManager:: getImageSize()
 void ResizeManager::setImage(QPixmap *image)
 {
     this->image=image;
+    this->imageSize=image->size();
 }
 
 void ResizeManager::setClient(QWidget *widget)
