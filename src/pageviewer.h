@@ -18,13 +18,16 @@ public:
     int go(bool start=false);
     int back();
     int setMoveMode(int mode);
-    int moveHorizontal(bool start=false, bool back=false);
-    int moveVertical(bool start=false, bool back=false);
+    int moveHorizontal(bool back=false);
+    int moveVertical(bool back=false);
     QRect &getTargetViewRect();
     QRect &getImageViewRect();
     void setImageSize(QSize size);
     void setClientSize(QSize size);
     void newPage();
+    bool isPageFinished(bool back=false);
+    bool isHorizontalFinished(bool back=false);
+    bool isVerticalFinished(bool back=false);
 private:
     QSize imageSize;
     QSize clientSize;
@@ -33,6 +36,8 @@ private:
     QPixmap resizedImageData;
     QRect imageViewRect;
     QRect targetViewRect;
+    void initHorizontal(bool back=false);
+    void initVertical(bool back=false);
 };
 
 #endif // VIEWRECT_H
