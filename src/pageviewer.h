@@ -3,10 +3,11 @@
 #include <QPoint>
 #include <QRect>
 #include <QPixmap>
+#include <QSize>
 class PageViewer
 {
 public:
-    enum MoveMode{LEFT_TO_RIGHT=0x01,RIGHT_TO_LEFT=0x00,UP_TO_DOWN=0x00,DOWN_TO_UP=0x02,VERTICAL_FIRST=0,HORIZONTAL_FIRST=0x04};
+    enum MoveMode{LEFT_TO_RIGHT=0x01,RIGHT_TO_LEFT=0x02,UP_TO_DOWN=0x04,DOWN_TO_UP=0x08,VERTICAL_FIRST=0x10,HORIZONTAL_FIRST=0x20};
 
     PageViewer();
     int stepUp(int step=1);
@@ -19,10 +20,14 @@ public:
     int setMoveMode(int mode);
     int moveHorizontal(bool start=false, bool back=false);
     int moveVertical(bool start=false, bool back=false);
-    QRect &getClientRect();
+    QRect &getTargetViewRect();
     QRect &getImageViewRect();
+    void setImageSize(QSize size);
+    void setClientSize(QSize size);
+    void newPage();
 private:
-
+    QSize imageSize;
+    QSize clientSize;
     QPoint currentPos;
     MoveMode moveMode;
     QPixmap resizedImageData;

@@ -9,7 +9,9 @@ SOURCES += main.cpp \
     testFileManager.cpp \
     ../filemanager.cpp \
     ../resizemanager.cpp \
-    testResizeManager.cpp
+    testResizeManager.cpp \
+    testPageViewer.cpp \
+    ../paveviewer.cpp
 
 INCLUDEPATH+= ./include ../include ../
 LIBS += -L../../src/testcase/lib -lgtest

@@ -26,7 +26,9 @@ int PageViewer::go(bool start)
             else
                 return -1;
         }
+        imageViewRect.moveTop(0);
     }
+
     else
     {
 
@@ -170,31 +172,72 @@ int PageViewer::moveHorizontal(bool start,bool back)
 
 int PageViewer::stepUp(int step)
 {
-
-    currentPos.setY(currentPos.y()+step);
+    int newTop=targetViewRect.top()-step;
+    newTop=newTop<0?0:newTop;
+    targetViewRect.moveTop(newTop);
+    return newTop;
 }
 
 int PageViewer::stepDown(int step)
 {
-   currentPos.setY(currentPos.y()-step);
+    int newBottom=targetViewRect.bottom()+step;
+    newBottom=newBottom>imageViewRect.bottom()?imageViewRect.bottom():newBottom;
+    targetViewRect.moveBottom(newBottom);
+    return newBottom;
 }
 
 int PageViewer::stepLeft(int step)
 {
-currentPos.setX(currentPos.x()+step);
+    int newLeft=targetViewRect.left()-step;
+    newLeft=newLeft<0?0:newLeft;
+    targetViewRect.moveLeft(newLeft);
+    return newLeft;
 }
 
 int PageViewer::stepRight(int step)
 {
-currentPos.setX(currentPos.x()-step);
+    int newRight=targetViewRect.right()+step;
+    newRight=newRight>imageViewRect.right()?imageViewRect.right():newRight;
+    targetViewRect.moveRight(newRight);
+    return newRight;
 }
 
-QRect &PageViewer::getClientRect()
+QRect &PageViewer::getTargetViewRect()
 {
-
+    return targetViewRect;
 }
 
 QRect &PageViewer::getImageViewRect()
 {
+    return imageViewRect;
+}
+void PageViewer::setImageSize(QSize size)
+{
+    this->imageSize=size;
+    this->imageViewRect.setSize(size);
+}
+void PageViewer::setClientSize(QSize size)
+{
+    this->clientSize=size;
+    this->targetViewRect.setSize(size);
+}
 
+void PageViewer::newPage()
+{
+    if(this->moveMode&LEFT_TO_RIGHT)
+    {
+        targetViewRect.moveLeft(0);
+    }
+    else
+    {
+        targetViewRect.moveRight(imageViewRect.right());
+    }
+    if(this->moveMode&UP_TO_DOWN)
+    {
+        targetViewRect.moveTop(0);
+    }
+    else
+    {
+        targetViewRect.moveBottom(imageViewRect.bottom());
+    }
 }
