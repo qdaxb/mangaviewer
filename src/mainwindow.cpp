@@ -8,6 +8,7 @@
 #include "filemanager.h"
 #include "msgpainter.h"
 #include "imagepainter.h"
+#include "mangaviewer.h"
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow)
@@ -17,6 +18,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->msgPainter=new MsgPainter(this,painter);
     this->msgPainter->setFont(MsgPainter::CENTER,QFont("Arial",14));
+    this->viewer=new MangaViewer(this,painter);
+    viewer->setPath("C:/");
+    viewer->go();
+    this->update();
 }
 
 MainWindow::~MainWindow()
@@ -31,7 +36,8 @@ void MainWindow::paintEvent(QPaintEvent *)
 {
     painter->begin(this);
 //    imagePainter->drawImage();
-    msgPainter->drawMessage();
+    viewer->draw();
+    //msgPainter->drawMessage();
     painter->end();
 
 
@@ -42,11 +48,15 @@ void MainWindow::paintEvent(QPaintEvent *)
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
 //    qDebug()<<event->key();
-//    switch (event->key())
-//    {
+    switch (event->key())
+    {
 
-//    case Qt::Key_Space :
-//    {
+    case Qt::Key_Space :
+    {
+        viewer->go();
+        update();
+    }
+    }
 //        if(imagePainter->go()==-1)
 //        {
 //            next();
@@ -153,29 +163,6 @@ void MainWindow::showEvent(QShowEvent *)
     toogleHelpMessage();
 }
 
-
-void MainWindow::next()
-{
-//    QString next=fileManager->next();
-//    if(next!="")
-//    {
-//        imagePainter->loadImage(next);
-//        //this->current->load(next);
-//        //this->resize(QSize(this->current->width()/2,this->current->height()/2));
-//    }
-//    msgPainter->showMessage(fileManager->current(),MsgPainter::BOTTOM);
-}
-void MainWindow::previous()
-{
-//    QString previous=fileManager->previous();
-//    if(previous!="")
-//    {
-//        imagePainter->loadImage(previous);
-//        //this->current->load(previous);
-//        //this->resize(QSize(this->current->width()/2,this->current->height()/2));
-//    }
-//    msgPainter->showMessage(fileManager->current(),MsgPainter::BOTTOM);
-}
 
 void MainWindow::openLoadFolderDialog()
 {

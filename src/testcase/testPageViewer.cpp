@@ -182,12 +182,12 @@ TEST_F(TestPageViewer, testGoAndBack)
     pv->newPage();
 //    ASSERT_EQ(pv->go(),-1);
 
-    ASSERT_EQ(pv->getTargetViewRect().left(),10);
-    ASSERT_EQ(pv->getTargetViewRect().top(),20);
+    ASSERT_EQ(pv->getTargetViewRect().left(),-10);
+    ASSERT_EQ(pv->getTargetViewRect().top(),-20);
     ASSERT_EQ(pv->go(),-1);
-    ASSERT_EQ(pv->getTargetViewRect().left(),10);
-    ASSERT_EQ(pv->getTargetViewRect().top(),20);
+    ASSERT_EQ(pv->getTargetViewRect().left(),-10);
+    ASSERT_EQ(pv->getTargetViewRect().top(),-20);
     ASSERT_EQ(pv->back(),-1);
-    ASSERT_EQ(pv->getTargetViewRect().left(),10);
-    ASSERT_EQ(pv->getTargetViewRect().top(),20);
+    ASSERT_EQ(pv->getTargetViewRect().left(),-10);
+    ASSERT_EQ(pv->getTargetViewRect().top(),-20);
 }

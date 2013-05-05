@@ -87,7 +87,8 @@ void ResizeManager::resize()
 
     else
     {
-        qDebug()<<"error resize mode!!!";
+       // qDebug()<<"error resize mode!!!";
+
     }
     if(widget->size()!=clientSize)
     {

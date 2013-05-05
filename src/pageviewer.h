@@ -9,7 +9,7 @@ class PageViewer
 public:
     enum MoveMode{LEFT_TO_RIGHT=0x01,RIGHT_TO_LEFT=0x02,UP_TO_DOWN=0x04,DOWN_TO_UP=0x08,VERTICAL_FIRST=0x10,HORIZONTAL_FIRST=0x20};
 
-    PageViewer();
+    PageViewer(){}
     int stepUp(int step=1);
     int stepDown(int step=1);
     int stepLeft(int step=1);

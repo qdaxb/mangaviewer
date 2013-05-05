@@ -5,7 +5,7 @@ ImagePainter::ImagePainter(QPainter *painter)
 {
     this->painter=painter;
 }
-int ImagePainter::drawImage(QPixmap &imageData,const QRect &imageRect,QRect &clientRect)
+int ImagePainter::drawImage(QPixmap &imageData,QRect imageRect,QRect clientRect)
 {
     painter->drawPixmap(clientRect,(imageData),imageRect);
 }

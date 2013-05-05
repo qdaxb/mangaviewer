@@ -13,6 +13,7 @@ class MsgPainter;
 class ImagePainter;
 class QDragEnterEvent;
 class QDragMoveEvent;
+class MangaViewer;
 class MainWindow : public QWidget
 {
     Q_OBJECT
@@ -20,10 +21,6 @@ class MainWindow : public QWidget
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
-
-
-
 protected:
     virtual void paintEvent(QPaintEvent *);
     void keyPressEvent(QKeyEvent *event);
@@ -34,11 +31,9 @@ protected:
     void mouseMoveEvent(QMouseEvent *);
 private:
     Ui::MainWindow *ui;
-
+    MangaViewer *viewer;
     QPainter *painter;
     MsgPainter *msgPainter;
-    void next();
-    void previous();
     void openLoadFolderDialog();
     void toogleHelpMessage();
     void toogleFileMessage();

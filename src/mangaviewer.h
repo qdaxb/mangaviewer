@@ -6,6 +6,7 @@
 #include "imagepainter.h"
 #include "resizemanager.h"
 #include "pageviewer.h"
+class QWidget;
 class MangaViewer
 {
 public:
@@ -14,6 +15,7 @@ public:
     void draw();
     void go();
     void back();
+
     ResizeManager *getResizeManager();
     void setResizeMode(ResizeManager::ResizeMode mode,float rate=1);
 private:
@@ -24,6 +26,7 @@ private:
     QPixmap *currentImage;
     ResizeManager *resizeManager;
     PageViewer *pageViewer;
+    QWidget *parent;
 };
 
 #endif // MANGAVIEWER_H

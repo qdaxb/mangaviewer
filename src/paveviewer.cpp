@@ -1,8 +1,5 @@
 #include "pageviewer.h"
 #include <QDebug>
-PageViewer::PageViewer()
-{
-}
 int PageViewer::setMoveMode(int mode)
 {
     this->moveMode=(MoveMode)mode;
@@ -23,8 +20,8 @@ int PageViewer::go(bool start)
         moveHorizontal();
     }
 
-    if(isPageFinished())
-        return -1;
+//    if(isPageFinished())
+//        return -1;
     return 0;
 }
 
@@ -42,8 +39,8 @@ int PageViewer::back()
         moveHorizontal(true);
     }
 
-    if(isPageFinished(true))
-        return -1;
+//    if(isPageFinished(true))
+//        return -1;
     return 0;
 }
 
@@ -125,6 +122,7 @@ QRect &PageViewer::getImageViewRect()
 }
 void PageViewer::setImageSize(QSize size)
 {
+    this->imageSize.setHeight(100);
     this->imageSize=size;
     this->imageViewRect.setSize(size);
 }
@@ -136,7 +134,7 @@ void PageViewer::setClientSize(QSize size)
 void PageViewer::initVertical(bool back){
     if(targetViewRect.height()>imageViewRect.height())
     {
-        targetViewRect.moveTop((targetViewRect.height()-imageViewRect.height())>>1);
+        targetViewRect.moveTop((imageViewRect.height()-targetViewRect.height())>>1);
         return;
     }
     if(((bool)(this->moveMode&UP_TO_DOWN))^back)
@@ -151,7 +149,7 @@ void PageViewer::initVertical(bool back){
 void PageViewer::initHorizontal(bool back){
     if(targetViewRect.width()>imageViewRect.width())
     {
-        targetViewRect.moveLeft((targetViewRect.width()-imageViewRect.width())>>1);
+        targetViewRect.moveLeft((imageViewRect.width()-targetViewRect.width())>>1);
         return;
     }
     if(((bool)(this->moveMode&LEFT_TO_RIGHT))^back)

@@ -10,7 +10,7 @@ class ImagePainter
 {
 public:
     ImagePainter(QPainter* painter);
-    int drawImage(QPixmap &imageData,const QRect &imageRect,QRect &clientRect);
+    int drawImage(QPixmap &imageData,QRect imageRect,QRect clientRect);
 private:
     QPainter *painter;
 
