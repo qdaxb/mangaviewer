@@ -6,7 +6,7 @@
 QMap<QString,ViewerCommand*> registry;
 CommandRegistry::CommandRegistry()
 {
-
+    defaultCommand=new ViewerEmptyCommand();
 
 }
 

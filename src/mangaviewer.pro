@@ -22,7 +22,8 @@ SOURCES +=\
     mangaviewer.cpp \
     paveviewer.cpp \
     viewercommand.cpp \
-    commandregistry.cpp
+    commandregistry.cpp \
+    keymapper.cpp
 
 HEADERS  += mainwindow.h \
     filemanager.h \
@@ -35,7 +36,8 @@ HEADERS  += mainwindow.h \
     mangaviewer.h \
     pageviewer.h \
     viewercommand.h \
-    commandregistry.h
+    commandregistry.h \
+    keymapper.h
 
 FORMS    += mainwindow.ui
 

@@ -11,6 +11,7 @@
 #include "mangaviewer.h"
 #include "commandregistry.h"
 #include "viewercommand.h"
+#include <QSettings>
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow)
@@ -18,11 +19,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     commandRegistry=new CommandRegistry();
     this->painter=new QPainter(this);
-
+    QSettings setting(QApplication::applicationDirPath ()+"/settings.ini",QSettings::IniFormat);
+    setting.beginGroup("keys");
+    QStringList list=setting.childKeys();
+    for(int i=0;i<list.size();i++)
+    {
+        QString key=list.at(i);
+        QString value=setting.value(key).toString();
+        commandRegistry->map(value,"Viewer"+key+"Command");
+    }
     this->msgPainter=new MsgPainter(this,painter);
     this->msgPainter->setFont(MsgPainter::CENTER,QFont("Arial",14));
     this->viewer=new MangaViewer(this,painter);
-    qDebug()<<commandRegistry->map("K"+QString::number(Qt::Key_Space),"ViewerOpenFileCommand");
+    //qDebug()<<commandRegistry->map("K"+QString::number(Qt::Key_Space),"ViewerOpenFileCommand");
     //viewer->setPath("C:/");
     //viewer->go();
     this->update();
