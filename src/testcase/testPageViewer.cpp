@@ -127,7 +127,7 @@ TEST_F(TestPageViewer, testGoAndBack)
     ASSERT_EQ(pv->getTargetViewRect().left(),110);
     ASSERT_EQ(pv->getTargetViewRect().right(),309);
 
-    ASSERT_EQ(pv->go(),-1);
+    ASSERT_EQ(pv->go(),0);
     ASSERT_EQ(pv->getTargetViewRect().top(),120);
     ASSERT_EQ(pv->getTargetViewRect().bottom(),319);
     ASSERT_EQ(pv->getTargetViewRect().left(),0);
@@ -164,7 +164,7 @@ TEST_F(TestPageViewer, testGoAndBack)
     ASSERT_EQ(pv->getTargetViewRect().left(),200);
     ASSERT_EQ(pv->getTargetViewRect().right(),399);
 
-    ASSERT_EQ(pv->back(),-1);
+    ASSERT_EQ(pv->back(),0);
     ASSERT_EQ(pv->getTargetViewRect().top(),0);
     ASSERT_EQ(pv->getTargetViewRect().bottom(),199);
     ASSERT_EQ(pv->getTargetViewRect().left(),310);

@@ -14,6 +14,7 @@ class ImagePainter;
 class QDragEnterEvent;
 class QDragMoveEvent;
 class MangaViewer;
+class CommandRegistry;
 class MainWindow : public QWidget
 {
     Q_OBJECT
@@ -38,6 +39,7 @@ private:
     void toogleHelpMessage();
     void toogleFileMessage();
     QPoint dragPosition;
+    CommandRegistry *commandRegistry;
 void showScaleMessage();
 };
 

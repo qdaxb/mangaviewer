@@ -9,19 +9,25 @@
 #include "msgpainter.h"
 #include "imagepainter.h"
 #include "mangaviewer.h"
+#include "commandregistry.h"
+#include "viewercommand.h"
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    commandRegistry=new CommandRegistry();
     this->painter=new QPainter(this);
 
     this->msgPainter=new MsgPainter(this,painter);
     this->msgPainter->setFont(MsgPainter::CENTER,QFont("Arial",14));
     this->viewer=new MangaViewer(this,painter);
-    viewer->setPath("C:/");
-    viewer->go();
+    commandRegistry->setDefultCommand(new ViewerEmptyCommand(viewer));
+    commandRegistry->put("K"+Qt::Key_Space,new ViewerOpenFileCommand(viewer));
+    //viewer->setPath("C:/");
+    //viewer->go();
     this->update();
+    setAcceptDrops(true);
 }
 
 MainWindow::~MainWindow()
@@ -44,19 +50,16 @@ void MainWindow::paintEvent(QPaintEvent *)
 
 }
 
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    qDebug()<<event->mimeData();
+}
+
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-//    qDebug()<<event->key();
-    switch (event->key())
-    {
-
-    case Qt::Key_Space :
-    {
-        viewer->go();
-        update();
-    }
-    }
+    qDebug()<<event->key();
+    commandRegistry->get("K"+event->key())->execute();
 //        if(imagePainter->go()==-1)
 //        {
 //            next();
@@ -133,12 +136,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 }
 void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 {
-
+    event->mimeData();
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
-//    dragPosition=event->pos();
+    qDebug()<<event->button();
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
@@ -151,11 +154,6 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 //    imagePainter->stepDown(newPosition.y()-dragPosition.y());
 
 }
-void MainWindow::dragEnterEvent(QDragEnterEvent *event)
-{
-//    dragPosition=event->pos();
-}
-
 
 
 void MainWindow::showEvent(QShowEvent *)

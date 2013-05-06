@@ -24,7 +24,12 @@ void MangaViewer::setPath(QString path)
 void MangaViewer::draw()
 {
     //resizeManager->resize();
+    if(currentImage==NULL)
+        return;
+    pageViewer->setClientSize(parent->size());
+
     imagePainter->drawImage((QPixmap &)*currentImage,pageViewer->getTargetViewRect(),parent->rect());
+
 }
 
 void MangaViewer::go()
@@ -41,4 +46,17 @@ void MangaViewer::go()
 
 void MangaViewer::back()
 {
+    if(currentImage==NULL||currentImage->isNull()||pageViewer->back()==-1)
+    {
+        currentImage=imageLoader->loadImage(fileManager->previous());
+        resizeManager->setImage(currentImage);
+        resizeManager->resize();
+        pageViewer->setImageSize(resizeManager->getImageSize());
+        pageViewer->newPage();
+    }
+}
+
+void MangaViewer::update()
+{
+    parent->update();
 }

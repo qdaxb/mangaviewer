@@ -20,8 +20,6 @@ int PageViewer::go(bool start)
         moveHorizontal();
     }
 
-//    if(isPageFinished())
-//        return -1;
     return 0;
 }
 
@@ -39,8 +37,6 @@ int PageViewer::back()
         moveHorizontal(true);
     }
 
-//    if(isPageFinished(true))
-//        return -1;
     return 0;
 }
 
@@ -188,7 +184,7 @@ bool PageViewer::isHorizontalFinished(bool back)
 
 bool PageViewer::isVerticalFinished(bool back)
 {
-    if(targetViewRect.width()>imageViewRect.width())
+    if(targetViewRect.height()>imageViewRect.height())
     {
         return true;
     }

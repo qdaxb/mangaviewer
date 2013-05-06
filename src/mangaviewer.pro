@@ -20,7 +20,9 @@ SOURCES +=\
     resizemanager.cpp \
     imageloader.cpp \
     mangaviewer.cpp \
-    paveviewer.cpp
+    paveviewer.cpp \
+    viewercommand.cpp \
+    commandregistry.cpp
 
 HEADERS  += mainwindow.h \
     filemanager.h \
@@ -31,7 +33,9 @@ HEADERS  += mainwindow.h \
     resizemanager.h \
     imageloader.h \
     mangaviewer.h \
-    pageviewer.h
+    pageviewer.h \
+    viewercommand.h \
+    commandregistry.h
 
 FORMS    += mainwindow.ui
 
