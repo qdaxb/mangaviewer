@@ -22,8 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->msgPainter=new MsgPainter(this,painter);
     this->msgPainter->setFont(MsgPainter::CENTER,QFont("Arial",14));
     this->viewer=new MangaViewer(this,painter);
-    commandRegistry->setDefultCommand(new ViewerEmptyCommand(viewer));
-    commandRegistry->put("K"+Qt::Key_Space,new ViewerOpenFileCommand(viewer));
+    qDebug()<<commandRegistry->map("K"+QString::number(Qt::Key_Space),"ViewerOpenFileCommand");
     //viewer->setPath("C:/");
     //viewer->go();
     this->update();
@@ -59,7 +58,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     qDebug()<<event->key();
-    commandRegistry->get("K"+event->key())->execute();
+    commandRegistry->get("K"+(QString::number(event->key())))->execute(viewer);
 //        if(imagePainter->go()==-1)
 //        {
 //            next();

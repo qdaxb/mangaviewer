@@ -1,30 +1,37 @@
 #ifndef VIEWERCOMMAND_H
 #define VIEWERCOMMAND_H
 #include <QObject>
+
 class MangaViewer;
+/*
+  A macro that used to declare new commands
+  */
+
 class ViewerCommand:public QObject
 {
 public:
-    ViewerCommand(MangaViewer *viewer){this->viewer=viewer;}
-    virtual void execute()=0;
+    ViewerCommand();
+    virtual void execute(MangaViewer *viewer)=0;
 protected:
     MangaViewer *viewer;
-private:
-    ViewerCommand();
 };
 
-class ViewerOpenFileCommand : public ViewerCommand
-{
-public:
-    ViewerOpenFileCommand(MangaViewer *viewer):ViewerCommand(viewer){}
-    virtual void execute();
+#define REGISTER_COMMAND(name)\
+static AutoRegister<name> name(#name);
+
+#define DECLARE_COMMAND(name)\
+class name  : public ViewerCommand \
+{\
+public:\
+    name (){}\
+    virtual void execute(MangaViewer *context);\
 };
 
-class ViewerEmptyCommand : public ViewerCommand
-{
-public:
-    ViewerEmptyCommand(MangaViewer *viewer):ViewerCommand(viewer){}
-    virtual void execute();
-};
 
+DECLARE_COMMAND(ViewerOpenFileCommand)
+DECLARE_COMMAND(ViewerEmptyCommand)
+DECLARE_COMMAND(ViewerGoCommand)
+DECLARE_COMMAND(ViewerBackCommand)
+DECLARE_COMMAND( ViewerNextPageCommand )
+DECLARE_COMMAND( ViewerPreviousPageCommand )
 #endif // VIEWERCOMMAND_H
