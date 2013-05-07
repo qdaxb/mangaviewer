@@ -13,6 +13,7 @@
 #include "viewercommand.h"
 #include "pageviewer.h"
 #include <QSettings>
+#include <QUrl>
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow)
@@ -36,9 +37,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->msgPainter=new MsgPainter(this,painter);
     this->msgPainter->setFont(MsgPainter::CENTER,QFont("Arial",14));
     this->viewer=new MangaViewer(this,painter);
-    //qDebug()<<commandRegistry->map("K"+QString::number(Qt::Key_Space),"ViewerOpenFileCommand");
-    //viewer->setPath("C:/");
-    //viewer->go();
     this->update();
     setAcceptDrops(true);
 }
@@ -50,6 +48,15 @@ MainWindow::~MainWindow()
     delete msgPainter;
 
 }
+void MainWindow::wheelEvent(QWheelEvent *event)
+{
+    int delta=event->delta();
+    if(delta>0)
+         commandRegistry->get("Wup")->execute(viewer);
+    else
+        commandRegistry->get("Wdown")->execute(viewer);
+}
+
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     qDebug()<<"resize";
@@ -57,6 +64,16 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     viewer->getPage()->setClientSize(this->size());
     viewer->getPage()->newPage();
 
+}
+
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    if(!event->mimeData()->hasUrls())
+        return;
+    qDebug()<<event->mimeData()->urls().first().toString().remove("file:///");
+    viewer->setPath(event->mimeData()->urls().first().toString().remove("file:///"));
+    viewer->go();
+    update();
 }
 
 void MainWindow::paintEvent(QPaintEvent *)
@@ -71,10 +88,14 @@ void MainWindow::paintEvent(QPaintEvent *)
 
 
 }
+void MainWindow::mouseReleaseEvent(QMouseEvent *event)
+{
+    commandRegistry->get("M"+(QString::number(event->button())))->execute(viewer);
+}
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-    qDebug()<<event->mimeData();
+    event->accept();
 }
 
 
@@ -82,79 +103,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     qDebug()<<event->key();
     commandRegistry->get("K"+(QString::number(event->key())))->execute(viewer);
-//        if(imagePainter->go()==-1)
-//        {
-//            next();
-//        }
-//        else
-//        {
-//            msgPainter->hideMessage(MsgPainter::BOTTOM|MsgPainter::TOP);
-//        }
-//        this->update();
-//        break;
-//    }
-//    case Qt::Key_Backspace :
-//    {
-//        if(imagePainter->back()==-1)
-//        {
-//            previous();
-//        }
-//        else
-//        {
-//            msgPainter->hideMessage(MsgPainter::BOTTOM);
-//        }
-//        this->update();
-//        break;
-//    }
-//    case Qt::Key_Up:imagePainter->stepUp(5);this->update();break;
-//    case Qt::Key_Down:imagePainter->stepDown(5);this->update();break;
-//    case Qt::Key_Left:imagePainter->stepLeft(5);this->update();break;
-//    case Qt::Key_Right:imagePainter->stepRight(5);this->update();break;
-//    case Qt::Key_O:openLoadFolderDialog();this->update();break;
-//    case Qt::Key_V:toogleFileMessage();this->update();break;
-//    case Qt::Key_1:{
-//        if(event->modifiers()==Qt::AltModifier)
-//        {
-//            imagePainter->setResizeMode(ImagePainter::RATE,0.5);
-//            showScaleMessage();
-//            this->update();
-//        }
-//        break;
-//    }
-
-//    case Qt::Key_2:{
-//        if(event->modifiers()==Qt::AltModifier)
-//        {
-//            imagePainter->setResizeMode(ImagePainter::RATE,1);
-//            showScaleMessage();
-//            this->update();
-//        }
-//        break;
-//    }
-//    case Qt::Key_3:if(event->modifiers()==Qt::AltModifier){imagePainter->setResizeMode(ImagePainter::RATE,1.5);showScaleMessage();this->update();}break;
-//    case Qt::Key_4:if(event->modifiers()==Qt::AltModifier){imagePainter->setResizeMode(ImagePainter::RATE,2);showScaleMessage();this->update();}break;
-//    case Qt::Key_Q:imagePainter->setResizeMode(ImagePainter::FIT_WINDOW_HEIGHT);showScaleMessage();this->update();break;
-//    case Qt::Key_H:toogleHelpMessage();this->update();break;
-//    case Qt::Key_E:{imagePainter->setResizeMode(ImagePainter::FIT_WINDOW_WIDTH);showScaleMessage();this->update();}break;
-//    case Qt::Key_W:{imagePainter->setResizeMode(ImagePainter::FIT_WINDOW);showScaleMessage();this->update();}break;
-//    case Qt::Key_QuoteLeft:
-//    {
-//        if(event->modifiers()==Qt::AltModifier)
-//        {
-//            imagePainter->setResizeMode(ImagePainter::NO_FIT);
-//            showScaleMessage();
-//        }
-//        else
-//        {
-//            imagePainter->setResizeMode(ImagePainter::FIT_IMAGE);
-//            showScaleMessage();
-//        }
-//        this->update();
-//        break;
-//    }
-//    case Qt::Key_F:if(this->isMaximized())this->showNormal();else this->showMaximized();break;
-//    }
-
 }
 void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 {
@@ -163,18 +111,13 @@ void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
-    commandRegistry->get("M"+(QString::number(event->button())))->execute(viewer);
+
     qDebug()<<event->button();
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
 
-//    if(event->buttons()!=Qt::LeftButton)
-//        return;
-//    QPoint newPosition=event->pos();
-//    imagePainter->stepRight(newPosition.x()-dragPosition.x());
-//    imagePainter->stepDown(newPosition.y()-dragPosition.y());
 
 }
 
@@ -187,23 +130,7 @@ void MainWindow::showEvent(QShowEvent *)
 
 void MainWindow::openLoadFolderDialog()
 {
-//    QString dir =QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-//                                                   "",
-//                                                   QFileDialog::ShowDirsOnly
-//                                                   );
-//    if(dir=="")
-//    {
-//        return;
-//    }
-//    else
-//    {
-//        this->fileManager->load(dir);
-//        //this->current->load(fileManager->next());
-//        imagePainter->loadImage(fileManager->next());
-//        msgPainter->hideMessage(MsgPainter::CENTER);
-//        msgPainter->showMessage(fileManager->current(),MsgPainter::BOTTOM);
-//        showScaleMessage();
-//    }
+
 }
 void MainWindow::toogleHelpMessage()
 {

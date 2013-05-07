@@ -22,6 +22,9 @@ class MainWindow : public QWidget
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void mouseReleaseEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event);
+    void dropEvent(QDropEvent *event);
 protected:
     void resizeEvent(QResizeEvent *event);
     virtual void paintEvent(QPaintEvent *);

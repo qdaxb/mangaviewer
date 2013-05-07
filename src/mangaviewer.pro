@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui testlib
+QT       += core gui
 
 TARGET =mangaviewer 
 TEMPLATE = app
