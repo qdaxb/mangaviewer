@@ -20,9 +20,9 @@ void ViewerOpenFileCommand::execute(MangaViewer *viewer)
         }
         else
         {
-           this->viewer->setPath(dir);
-           this->viewer->go();
-           this->viewer->update();
+           viewer->setPath(dir);
+           viewer->go();
+           viewer->getWidget()->update();
          }
 
 }
@@ -39,20 +39,23 @@ REGISTER_COMMAND(ViewerGoCommand)
 void ViewerGoCommand::execute(MangaViewer *viewer)
 {
     viewer->go();
-    viewer->update();
+   viewer->getWidget()->update();
 }
 
 REGISTER_COMMAND(ViewerBackCommand)
 void ViewerBackCommand::execute(MangaViewer *viewer)
 {
     viewer->back();
-    viewer->update();
+    viewer->getWidget()->update();
 }
 
 REGISTER_COMMAND(ViewerNextPageCommand)
 void ViewerNextPageCommand::execute(MangaViewer *viewer)
 {
-
+    FileManager *manager=viewer->getFileManager();
+    manager->next();
+    viewer->update();
+    viewer->getWidget()->update();
 }
 
 REGISTER_COMMAND(ViewerPreviousPageCommand)

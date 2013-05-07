@@ -23,6 +23,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 protected:
+    void resizeEvent(QResizeEvent *event);
     virtual void paintEvent(QPaintEvent *);
     void keyPressEvent(QKeyEvent *event);
     void showEvent(QShowEvent *);

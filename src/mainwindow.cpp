@@ -11,6 +11,7 @@
 #include "mangaviewer.h"
 #include "commandregistry.h"
 #include "viewercommand.h"
+#include "pageviewer.h"
 #include <QSettings>
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
@@ -26,7 +27,11 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         QString key=list.at(i);
         QString value=setting.value(key).toString();
-        commandRegistry->map(value,"Viewer"+key+"Command");
+        QStringList valueList=value.split("|");
+        for(int j=0;j<valueList.size();j++)
+        {
+            commandRegistry->map(valueList.at(j),"Viewer"+key+"Command");
+        }
     }
     this->msgPainter=new MsgPainter(this,painter);
     this->msgPainter->setFont(MsgPainter::CENTER,QFont("Arial",14));
@@ -45,9 +50,18 @@ MainWindow::~MainWindow()
     delete msgPainter;
 
 }
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    qDebug()<<"resize";
+    viewer->getResizeManager()->resize();
+    viewer->getPage()->setClientSize(this->size());
+    viewer->getPage()->newPage();
+
+}
 
 void MainWindow::paintEvent(QPaintEvent *)
 {
+    qDebug()<<"draw";
     painter->begin(this);
 //    imagePainter->drawImage();
     viewer->draw();
@@ -149,6 +163,7 @@ void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
+    commandRegistry->get("M"+(QString::number(event->button())))->execute(viewer);
     qDebug()<<event->button();
 }
 

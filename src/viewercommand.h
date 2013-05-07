@@ -12,8 +12,6 @@ class ViewerCommand:public QObject
 public:
     ViewerCommand();
     virtual void execute(MangaViewer *viewer)=0;
-protected:
-    MangaViewer *viewer;
 };
 
 #define REGISTER_COMMAND(name)\

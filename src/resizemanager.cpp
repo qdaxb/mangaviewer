@@ -46,6 +46,10 @@ float ResizeManager::getResizeRate()
 void ResizeManager::resize()
 {
     //resize for fit window
+    if(image==NULL)
+        return;
+    if(widget==NULL)
+        return;
     imageSize=image->size();
     clientSize=widget->size();
     int mode=this->resizeMode;

@@ -11,6 +11,7 @@ MangaViewer::MangaViewer(QWidget *parent, QPainter *painter)
     this->resizeManager=new ResizeManager();
     this->parent=parent;
     this->pageViewer=new PageViewer();
+    resizeManager->setClient(parent);
     pageViewer->setClientSize(parent->size());
     pageViewer->setMoveMode(PageViewer::RIGHT_TO_LEFT|PageViewer::UP_TO_DOWN);
     resizeManager->setResizeMode(ResizeManager::NO_RATE);
@@ -19,14 +20,15 @@ MangaViewer::MangaViewer(QWidget *parent, QPainter *painter)
 void MangaViewer::setPath(QString path)
 {
     fileManager->load(path);
-    resizeManager->setClient(parent);
 }
 void MangaViewer::draw()
 {
     //resizeManager->resize();
     if(currentImage==NULL)
         return;
-    pageViewer->setClientSize(parent->size());
+    //resizeManager->resize();
+   // pageViewer->setImageSize(resizeManager->getImageSize());
+
 
     imagePainter->drawImage((QPixmap &)*currentImage,pageViewer->getTargetViewRect(),parent->rect());
 
@@ -36,7 +38,10 @@ void MangaViewer::go()
 {
     if(currentImage==NULL||currentImage->isNull()||pageViewer->go()==-1)
     {
-        currentImage=imageLoader->loadImage(fileManager->next());
+        QString nextFile=fileManager->next();
+        if(nextFile=="")
+            return;
+        currentImage=imageLoader->loadImage(nextFile);
         resizeManager->setImage(currentImage);
         resizeManager->resize();
         pageViewer->setImageSize(resizeManager->getImageSize());
@@ -48,7 +53,10 @@ void MangaViewer::back()
 {
     if(currentImage==NULL||currentImage->isNull()||pageViewer->back()==-1)
     {
-        currentImage=imageLoader->loadImage(fileManager->previous());
+        QString previousFile=fileManager->previous();
+        if(previousFile=="")
+            return;
+        currentImage=imageLoader->loadImage(previousFile);
         resizeManager->setImage(currentImage);
         resizeManager->resize();
         pageViewer->setImageSize(resizeManager->getImageSize());
@@ -58,5 +66,11 @@ void MangaViewer::back()
 
 void MangaViewer::update()
 {
-    parent->update();
+    QString currentFile=fileManager->current();
+    if(currentFile=="")
+        return;
+    currentImage=imageLoader->loadImage(currentFile);
+    resizeManager->setImage(currentImage);
+    resizeManager->resize();
+    pageViewer->setImageSize(resizeManager->getImageSize());
 }

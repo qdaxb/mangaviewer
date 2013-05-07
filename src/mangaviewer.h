@@ -19,7 +19,9 @@ public:
     void back();
     void update();
     FileManager *getFileManager(){return fileManager;}
-    ResizeManager *getResizeManager();
+    QWidget *getWidget(){return parent;}
+    ResizeManager *getResizeManager(){return resizeManager;}
+    PageViewer *getPage(){return pageViewer;}
     void setResizeMode(ResizeManager::ResizeMode mode,float rate=1);
 private:
     MangaViewer();
