@@ -154,7 +154,18 @@ int FileManager::load(QString fileorpath)
     //容器初始化
     this->folderStack->clear();
     this->fileIndexInFolderStack->clear();
+    QFile file(fileorpath);
+    QFileInfo fileInfo(fileorpath);
+    if(fileInfo.isDir())
     loadFromFolder(fileorpath);
+    else
+    {
+        loadFromFolder(fileInfo.absolutePath());
+        if(isSuffixAcceptable(fileInfo.completeSuffix()))
+        {
+            currentIndex=fileListInCurrentFolder->indexOf(fileInfo.absoluteFilePath())-1;
+        }
+    }
     return 0;
 
 }

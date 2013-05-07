@@ -14,6 +14,7 @@
 #include "pageviewer.h"
 #include <QSettings>
 #include <QUrl>
+#include <QTimer>
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow)
@@ -38,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->msgPainter->setFont(MsgPainter::CENTER,QFont("Arial",14));
     this->viewer=new MangaViewer(this,painter);
     this->update();
+    mouseClickTimer = new QTimer(this);
+    connect(mouseClickTimer, SIGNAL(timeout()), this, SLOT(mouseClick()));
     setAcceptDrops(true);
 }
 
@@ -71,7 +74,7 @@ void MainWindow::dropEvent(QDropEvent *event)
     if(!event->mimeData()->hasUrls())
         return;
     qDebug()<<event->mimeData()->urls().first().toString().remove("file:///");
-    viewer->setPath(event->mimeData()->urls().first().toString().remove("file:///"));
+    viewer->loadPath(event->mimeData()->urls().first().toString().remove("file:///"));
     viewer->go();
     update();
 }
@@ -90,7 +93,7 @@ void MainWindow::paintEvent(QPaintEvent *)
 }
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
-    commandRegistry->get("M"+(QString::number(event->button())))->execute(viewer);
+
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -113,6 +116,9 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 {
 
     qDebug()<<event->button();
+    commandRegistry->get("M"+(QString::number(event->button())))->execute(viewer);
+    //mouseButton=(int)event->button();
+    //mouseClickTimer->start();
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
@@ -189,5 +195,17 @@ void MainWindow::showScaleMessage()
 //        str.append(tr("scale:%1%").arg(rate*100));
 
 //    }
-//    msgPainter->showMessage(str,MsgPainter::TOP);
+    //    msgPainter->showMessage(str,MsgPainter::TOP);
+}
+
+void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    mouseClickTimer->stop();
+    //commandRegistry->get("MD"+(QString::number(event->button())))->execute(viewer);
+}
+
+void MainWindow::mouseClick()
+{
+//mouseClickTimer->stop();
+    commandRegistry->get("M"+(QString::number(mouseButton)))->execute(viewer);
 }

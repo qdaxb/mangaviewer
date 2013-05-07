@@ -22,9 +22,7 @@ class MainWindow : public QWidget
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void mouseReleaseEvent(QMouseEvent *event);
-    void wheelEvent(QWheelEvent *event);
-    void dropEvent(QDropEvent *event);
+
 protected:
     void resizeEvent(QResizeEvent *event);
     virtual void paintEvent(QPaintEvent *);
@@ -34,6 +32,10 @@ protected:
     void dragMoveEvent(QDragMoveEvent *event);
     void mousePressEvent(QMouseEvent *);
     void mouseMoveEvent(QMouseEvent *);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event);
+    void dropEvent(QDropEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *);
 private:
     Ui::MainWindow *ui;
     MangaViewer *viewer;
@@ -44,7 +46,11 @@ private:
     void toogleFileMessage();
     QPoint dragPosition;
     CommandRegistry *commandRegistry;
-void showScaleMessage();
+    void showScaleMessage();
+    QTimer *mouseClickTimer;
+    int mouseButton;
+protected slots:
+    void mouseClick();
 };
 
 #endif // MAINWINDOW_H

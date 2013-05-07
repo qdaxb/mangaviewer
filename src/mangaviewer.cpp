@@ -17,7 +17,7 @@ MangaViewer::MangaViewer(QWidget *parent, QPainter *painter)
     resizeManager->setResizeMode(ResizeManager::NO_RATE);
     currentImage=NULL;
 }
-void MangaViewer::setPath(QString path)
+void MangaViewer::loadPath(QString path)
 {
     fileManager->load(path);
 }
@@ -40,7 +40,10 @@ void MangaViewer::go()
     {
         QString nextFile=fileManager->next();
         if(nextFile=="")
+        {
+            fileManager->previous();
             return;
+        }
         currentImage=imageLoader->loadImage(nextFile);
         resizeManager->setImage(currentImage);
         resizeManager->resize();
@@ -55,7 +58,10 @@ void MangaViewer::back()
     {
         QString previousFile=fileManager->previous();
         if(previousFile=="")
+        {
+            fileManager->next();
             return;
+        }
         currentImage=imageLoader->loadImage(previousFile);
         resizeManager->setImage(currentImage);
         resizeManager->resize();

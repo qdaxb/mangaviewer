@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QString>
 #include <QDebug>
+#include <QTime>
 #include "commandregistry.h"
 ViewerCommand::ViewerCommand()
 {
@@ -14,13 +15,15 @@ void ViewerOpenFileCommand::execute(MangaViewer *viewer)
                                                        "",
                                                       QFileDialog::ShowDirsOnly
                                                       );
+        QTime time;
+        time.start();
        if(dir=="")
         {
             return;
         }
         else
         {
-           viewer->setPath(dir);
+           viewer->loadPath(dir);
            viewer->go();
            viewer->getWidget()->update();
          }
@@ -38,8 +41,21 @@ void ViewerEmptyCommand::execute(MangaViewer *viewer)
 REGISTER_COMMAND(ViewerGoCommand)
 void ViewerGoCommand::execute(MangaViewer *viewer)
 {
+    if(viewer->getFileManager()->current()=="")
+    {
+        QString dir =QFileDialog::getExistingDirectory(0, tr("Open Directory"),
+                                                       "",
+                                                      QFileDialog::ShowDirsOnly
+                                                      );
+        QTime time;
+        time.start();
+       if(dir=="")
+        {
+            return;
+        }
+    }
     viewer->go();
-   viewer->getWidget()->update();
+    viewer->getWidget()->update();
 }
 
 REGISTER_COMMAND(ViewerBackCommand)

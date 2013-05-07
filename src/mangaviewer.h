@@ -13,7 +13,7 @@ class MangaViewer
 {
 public:
     MangaViewer(QWidget *parent,QPainter *painter);
-    void setPath(QString path);
+    void loadPath(QString path);
     void draw();
     void go();
     void back();
