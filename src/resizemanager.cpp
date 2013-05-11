@@ -3,6 +3,7 @@
 #include <QDebug>
 ResizeManager::ResizeManager()
 {
+    image=NULL;
 }
 int ResizeManager::setResizeMode(int resizeMode, float rate)
 {

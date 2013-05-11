@@ -5,7 +5,12 @@
 #-------------------------------------------------
 
 QT       += core gui
-
+QT += widgets
+QgreaterThan(QT_MAJOR_VERSION, 4) {
+QT *= widgets
+QT *= printsupport
+QT += widgets
+}
 TARGET =mangaviewer 
 TEMPLATE = app
 
@@ -23,7 +28,9 @@ SOURCES +=\
     paveviewer.cpp \
     viewercommand.cpp \
     commandregistry.cpp \
-    keymapper.cpp
+    keymapper.cpp \
+    qgraphicspagedpixmapitem.cpp \
+    qgraphicsmanagaview.cpp
 
 HEADERS  += mainwindow.h \
     filemanager.h \
@@ -37,9 +44,13 @@ HEADERS  += mainwindow.h \
     pageviewer.h \
     viewercommand.h \
     commandregistry.h \
-    keymapper.h
+    keymapper.h \
+    qgraphicspagedpixmapitem.h \
+    qgraphicsmanagaview.h \
+    common.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    qgraphicsmanagaview.ui
 
 
 INCLUDEPATH+= ./include

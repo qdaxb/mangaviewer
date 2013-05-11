@@ -3,7 +3,7 @@
 #include <QString>
 #include "viewercommand.h"
 
-QMap<QString,ViewerCommand*> registry;
+QMap<QString,ViewerCommand*> *registry;
 CommandRegistry::CommandRegistry()
 {
     defaultCommand=new ViewerEmptyCommand();
@@ -12,12 +12,12 @@ CommandRegistry::CommandRegistry()
 
 void CommandRegistry::put(QString key, ViewerCommand *command)
 {
-    registry[key]=command;
+    (*registry)[key]=command;
 }
 
 ViewerCommand *CommandRegistry::get(QString key)
 {
-    ViewerCommand *command=registry[key];
+    ViewerCommand *command=(*registry)[key];
     if(command)
         return command;
     return defaultCommand;
@@ -39,7 +39,9 @@ void CommandRegistry::setDefultCommand(ViewerCommand *command)
 
 void CommandRegistry::RegisterCommand(QString name, ViewerCommand *command)
 {
-    registry[name]=command;
+    if(registry==NULL)
+        registry=new QMap<QString,ViewerCommand*>();
+    (*registry)[name]=command;
 }
 
 

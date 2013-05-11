@@ -7,7 +7,7 @@ class MangaViewer;
   A macro that used to declare new commands
   */
 
-class ViewerCommand:public QObject
+class ViewerCommand
 {
 public:
     ViewerCommand();

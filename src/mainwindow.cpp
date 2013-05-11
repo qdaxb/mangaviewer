@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QPainter>
-#include <QPaintEVENT>
 #include <QDebug>
 #include <QFileDialog>
 #include <QPaintEngine>
@@ -15,6 +14,8 @@
 #include <QSettings>
 #include <QUrl>
 #include <QTimer>
+#include <QWheelEvent>
+#include <QMimeData>
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow)

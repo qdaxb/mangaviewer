@@ -11,7 +11,7 @@ ViewerCommand::ViewerCommand()
 REGISTER_COMMAND(ViewerOpenFileCommand)
 void ViewerOpenFileCommand::execute(MangaViewer *viewer)
 {
-        QString dir =QFileDialog::getExistingDirectory(0, tr("Open Directory"),
+        QString dir =QFileDialog::getExistingDirectory(0, ("Open Directory"),
                                                        "",
                                                       QFileDialog::ShowDirsOnly
                                                       );
@@ -43,16 +43,15 @@ void ViewerGoCommand::execute(MangaViewer *viewer)
 {
     if(viewer->getFileManager()->current()=="")
     {
-        QString dir =QFileDialog::getExistingDirectory(0, tr("Open Directory"),
+        QString dir =QFileDialog::getExistingDirectory(0, ("Open Directory"),
                                                        "",
                                                       QFileDialog::ShowDirsOnly
                                                       );
-        QTime time;
-        time.start();
        if(dir=="")
         {
             return;
         }
+       viewer->loadPath(dir);
     }
     viewer->go();
     viewer->getWidget()->update();
