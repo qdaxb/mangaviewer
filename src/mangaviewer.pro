@@ -15,9 +15,7 @@ TARGET =mangaviewer
 TEMPLATE = app
 
 
-SOURCES +=\
-        mainwindow.cpp \
-    filemanager.cpp \
+SOURCES += filemanager.cpp \
     main.cpp \
     rarfile.cpp \
     msgpainter.cpp \
@@ -32,9 +30,7 @@ SOURCES +=\
     qgraphicspagedpixmapitem.cpp \
     qgraphicsmanagaview.cpp
 
-HEADERS  += mainwindow.h \
-    filemanager.h \
-    mainwindow.h \
+HEADERS  +=    filemanager.h \
     rarfile.h \
     msgpainter.h \
     imagepainter.h \
@@ -49,8 +45,7 @@ HEADERS  += mainwindow.h \
     qgraphicsmanagaview.h \
     common.h
 
-FORMS    += mainwindow.ui \
-    qgraphicsmanagaview.ui
+FORMS    +=  qgraphicsmanagaview.ui
 
 
 INCLUDEPATH+= ./include

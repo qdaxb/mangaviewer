@@ -9,13 +9,10 @@ class CommandRegistry
 {
 public:
     CommandRegistry();
-    void put(QString key,ViewerCommand *command);
-    ViewerCommand *get(QString key);
-    void setDefultCommand(ViewerCommand *command);
+    static void put(QString key,ViewerCommand *command);
+    static ViewerCommand *get(QString key);
     static void RegisterCommand(QString name,ViewerCommand *command);
-    bool map(QString to, QString from);
-private:
-    ViewerCommand *defaultCommand;
+    static bool map(QString to, QString from);
 };
 template <typename T>
 class AutoRegister

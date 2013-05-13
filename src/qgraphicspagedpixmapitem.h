@@ -17,9 +17,14 @@ public:
     void setImage(QPixmap *image);
     QSize getPageSize();
     QSize getFullSize();
+    QSize getBaseSize();
     QSize getImageSize();
+    QPixmap *getImage(){return image;}
+    void setFilePath(QString filePath){this->filePath=filePath;}
+    QString getFilePath(){return filePath;}
 private:
     bool needSplit();
+    QString filePath;
     void doSplitPage();
     int splitMode;
     int pageCount;

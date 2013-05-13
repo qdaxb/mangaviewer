@@ -15,8 +15,10 @@ public:
     virtual QString next();
     virtual QString previous();
     virtual int load(QString fileorpath);
-    virtual QList<QString> list();
+    virtual QList<QString> &list();
     virtual int size();
+    virtual bool hasNext();
+    virtual bool hasPrevious();
 private:
     QList<QString>* fileListInCurrentFolder;
     QStack<QString>* folderStack;

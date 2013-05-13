@@ -11,6 +11,7 @@ QGraphicsPagedPixmapItem::QGraphicsPagedPixmapItem(QGraphicsItem *parent) :
         QGraphicsPixmapItem *newItem=new QGraphicsPixmapItem(this);
         splittedPages.append(newItem);
     }
+
 }
 
 QRectF QGraphicsPagedPixmapItem::boundingRect() const
@@ -53,7 +54,14 @@ QSize QGraphicsPagedPixmapItem::getFullSize()
 {
     if(image==NULL)
         return QSize(0,0);
-    return QSize(pageSize.width(),pageSize.height()*pageCount);
+    return QSize(pageSize.width()*this->scale(),pageSize.height()*pageCount*this->scale());
+}
+
+QSize QGraphicsPagedPixmapItem::getBaseSize()
+{
+    if(image==NULL)
+            return QSize(0,0);
+        return QSize(pageSize.width(),pageSize.height()*pageCount);
 }
 
 QSize QGraphicsPagedPixmapItem::getImageSize()

@@ -3,10 +3,11 @@
 #include <QString>
 #include "viewercommand.h"
 
-QMap<QString,ViewerCommand*> *registry;
+QMap<QString,ViewerCommand*> *registry=NULL;
+ViewerCommand *defaultCommand=new ViewerEmptyCommand();
 CommandRegistry::CommandRegistry()
 {
-    defaultCommand=new ViewerEmptyCommand();
+
 
 }
 
@@ -32,10 +33,6 @@ bool CommandRegistry::map(QString to,QString from)
     return true;
 }
 
-void CommandRegistry::setDefultCommand(ViewerCommand *command)
-{
-    this->defaultCommand=command;
-}
 
 void CommandRegistry::RegisterCommand(QString name, ViewerCommand *command)
 {

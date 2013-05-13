@@ -5,33 +5,35 @@
 #include <QDebug>
 #include <QTime>
 #include "commandregistry.h"
+#include "qgraphicsmanagaview.h"
+#include <algorithm>
 ViewerCommand::ViewerCommand()
 {
 }
 REGISTER_COMMAND(ViewerOpenFileCommand)
-void ViewerOpenFileCommand::execute(MangaViewer *viewer)
+void ViewerOpenFileCommand::execute(QGraphicsManagaView *viewer)
 {
-        QString dir =QFileDialog::getExistingDirectory(0, ("Open Directory"),
-                                                       "",
-                                                      QFileDialog::ShowDirsOnly
-                                                      );
-        QTime time;
-        time.start();
-       if(dir=="")
-        {
-            return;
-        }
-        else
-        {
-           viewer->loadPath(dir);
-           viewer->go();
-           viewer->getWidget()->update();
-         }
+    QString dir =QFileDialog::getExistingDirectory(0, ("Open Directory"),
+                                                   "",
+                                                   QFileDialog::ShowDirsOnly
+                                                   );
+    QTime time;
+    time.start();
+    if(dir=="")
+    {
+        return;
+    }
+    else
+    {
+        viewer->load(dir);
+        //           viewer->go();
+        //           viewer->update();
+    }
 
 }
 
 REGISTER_COMMAND(ViewerEmptyCommand)
-void ViewerEmptyCommand::execute(MangaViewer *viewer)
+void ViewerEmptyCommand::execute(QGraphicsManagaView *viewer)
 {
     //todo change the method to show a message on screen
     qDebug()<<"execute an empty command!";
@@ -39,43 +41,55 @@ void ViewerEmptyCommand::execute(MangaViewer *viewer)
 }
 
 REGISTER_COMMAND(ViewerGoCommand)
-void ViewerGoCommand::execute(MangaViewer *viewer)
+void ViewerGoCommand::execute(QGraphicsManagaView *viewer)
 {
-    if(viewer->getFileManager()->current()=="")
-    {
-        QString dir =QFileDialog::getExistingDirectory(0, ("Open Directory"),
-                                                       "",
-                                                      QFileDialog::ShowDirsOnly
-                                                      );
-       if(dir=="")
-        {
-            return;
-        }
-       viewer->loadPath(dir);
-    }
+
+    //        QString dir =QFileDialog::getExistingDirectory(0, ("Open Directory"),
+    //                                                       "",
+    //                                                      QFileDialog::ShowDirsOnly
+    //                                                      );
+    //       if(dir=="")
+    //        {
+    //            return;
+    //        }
+    //       viewer->load(dir);
     viewer->go();
-    viewer->getWidget()->update();
+    viewer->update();
 }
 
 REGISTER_COMMAND(ViewerBackCommand)
-void ViewerBackCommand::execute(MangaViewer *viewer)
+void ViewerBackCommand::execute(QGraphicsManagaView *viewer)
 {
     viewer->back();
-    viewer->getWidget()->update();
+    //    viewer->getWidget()->update();
 }
 
 REGISTER_COMMAND(ViewerNextPageCommand)
-void ViewerNextPageCommand::execute(MangaViewer *viewer)
+void ViewerNextPageCommand::execute(QGraphicsManagaView *viewer)
 {
-    FileManager *manager=viewer->getFileManager();
-    manager->next();
-    viewer->update();
-    viewer->getWidget()->update();
+    //    FileManager *manager=viewer->getFileManager();
+    //    manager->next();
+    //    viewer->update();
+    //    viewer->getWidget()->update();
 }
 
 REGISTER_COMMAND(ViewerPreviousPageCommand)
-void ViewerPreviousPageCommand::execute(MangaViewer *viewer)
+void ViewerPreviousPageCommand::execute(QGraphicsManagaView *viewer)
 {
 
 }
 
+REGISTER_COMMAND(ViewerScaleUpCommand)
+void ViewerScaleUpCommand::execute(QGraphicsManagaView *viewer)
+{
+    if(viewer->getScale()==-1)
+        viewer->setScale(1);
+    viewer->setScale(viewer->getScale()+0.1);
+}
+REGISTER_COMMAND(ViewerScaleDownCommand)
+void ViewerScaleDownCommand::execute(QGraphicsManagaView *viewer)
+{
+    if(viewer->getScale()==-1)
+        viewer->setScale(1);
+    viewer->setScale(viewer->getScale()-0.1);
+}

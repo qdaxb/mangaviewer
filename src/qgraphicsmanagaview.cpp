@@ -5,45 +5,118 @@
 #include <QBrush>
 #include <QDebug>
 #include <QPixmap>
-
-
+#include "filemanager.h"
+#include "commandregistry.h"
+#include <QKeyEvent>
+#include "viewercommand.h"
+#include <QSettings>
+#include <QApplication>
+#include <algorithm>
 QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::QGraphicsManagaView),scene(),pageViewers()
+    ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageFiles(),fileManager(),rate(1)
 {
     ui->setupUi(this);
     ui->graphicsView->setScene(&scene);
     scene.setBackgroundBrush(QBrush(Qt::black));
     ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QSettings setting(QApplication::applicationDirPath ()+"/settings.ini",QSettings::IniFormat);
+    setting.beginGroup("keys");
+    QStringList list=setting.childKeys();
+    for(int i=0;i<list.size();i++)
+    {
+        QString key=list.at(i);
+        QString value=setting.value(key).toString();
+        QStringList valueList=value.split("|");
+        for(int j=0;j<valueList.size();j++)
+        {
+            CommandRegistry::map(valueList.at(j),"Viewer"+key+"Command");
+        }
+    }
 
-    {
-        QGraphicsPagedPixmapItem *pageViewer=new QGraphicsPagedPixmapItem();
-        pageViewer->setPageSplitMode(Manga::SPLIT_AUTO);
-        QPixmap *map=new QPixmap();
-        map->load("/home/axb/test.jpg");
-        scene.addItem(pageViewer);
-        pageViewer->setImage(map);
-        pageViewers.push_back(pageViewer);
-    }
-    {
-        QGraphicsPagedPixmapItem *pageViewer=new QGraphicsPagedPixmapItem();
-        pageViewer->setPageSplitMode(Manga::SPLIT_AUTO);
-        QPixmap *map=new QPixmap();
-        map->load("/home/axb/test1.jpg");
-        scene.addItem(pageViewer);
-        pageViewer->setImage(map);
-        pageViewer->setY(pageViewers.last()->y()+pageViewers.last()->getFullSize().height());
-        qDebug()<<"a"<<pageViewers.last()->y();
-        qDebug()<<"c"<<pageViewers.last()->getFullSize().height();
-        qDebug()<<"b"<<pageViewer->y();
-        pageViewers.push_back(pageViewer);
-    }
 }
 
-void QGraphicsManagaView::keyReleaseEvent(QKeyEvent *)
+
+int QGraphicsManagaView::load(QString fileorpath)
 {
-    go(0.1);
+    pageFiles.clear();
+    fileManager.load(fileorpath);
+    init();
+}
+
+void QGraphicsManagaView::init()
+{
+    int pageCount=0;
+    qreal totalHeight=0;
+    isFirstPage=true;
+    isLastPage=fileManager.size()==1;
+    while(totalHeight<scene.height()||pageCount<=1)
+    {
+        QString file=fileManager.next();
+        if(file=="")
+            break;
+        QPixmap *image;
+        if(pageViewers.size()<=pageCount)
+        {
+            QGraphicsPagedPixmapItem *pageViewer=new QGraphicsPagedPixmapItem();
+
+            //todo split mode
+            pageViewer->setPageSplitMode(Manga::SPLIT_AUTO);
+            scene.addItem(pageViewer);
+            image=new QPixmap(file);
+            pageViewer->setImage(image);
+            pageViewer->setFilePath(file);
+            pageViewers.push_back(pageViewer);
+
+        }
+        else
+        {
+
+            image=pageViewers.at(pageCount)->getImage();
+            if(image==NULL)
+            {
+                image=new QPixmap();
+            }
+            image->load(file);
+            pageViewers.at(pageCount)->setImage(image);
+            pageViewers.at(pageCount)->setFilePath(file);
+
+        }
+        pageFiles.push_back(file);
+        pageCount++;
+        totalHeight+=pageViewers.last()->getFullSize().height();
+
+    }
+    if(pageCount<pageViewers.size())
+    {
+        int totalSize=pageViewers.size();
+        for(int i=pageCount;i<totalSize;i++)
+        {
+            scene.removeItem(pageViewers.last());
+            pageViewers.removeLast();
+        }
+    }
+
+    adjustPages();
+
+}
+
+void QGraphicsManagaView::adjustPages()
+{
+    if(pageViewers.isEmpty())
+        return;
+    pageViewers.first()->setX((scene.width() - pageViewers.first()->getFullSize().width())/2);
+    if(pageViewers.first()->y()>0)
+        pageViewers.first()->setY(0);
+    qreal ypos=pageViewers.first()->getFullSize().height();
+    for(int i=1;i<pageViewers.size();i++)
+    {
+
+        pageViewers.at(i)->setX((scene.width() - pageViewers.at(i)->getFullSize().width())/2);
+        pageViewers.at(i)->setY(ypos);
+        ypos+=pageViewers.at(i)->getFullSize().height();
+    }
 }
 
 QGraphicsManagaView::~QGraphicsManagaView()
@@ -53,27 +126,74 @@ QGraphicsManagaView::~QGraphicsManagaView()
 
 void QGraphicsManagaView::go(qreal step)
 {
+    if(pageViewers.size()==0)
+        return;
+    if(step==0)
+        step=0.5;
     bool needNextPage=false;
-    qreal distance=-scene.height()*step;
+    qreal distance=isLastPage?scene.height()-pageViewers.last()->getFullSize().height()-pageViewers.last()->y():-scene.height()*step;
+    distance=std::max(distance,-scene.height()*step);
     for(int i=0;i<pageViewers.size();i++)
     {
+
         pageViewers.at(i)->moveBy(0,distance);
         if(pageViewers.at(i)->y()+pageViewers.at(i)->getFullSize().height()<0)
             needNextPage=true;
     }
-    if(needNextPage)
+    if(needNextPage && ( ! isLastPage ) )
     {
+        isFirstPage=false;
         QGraphicsPagedPixmapItem *item=pageViewers.first();
         pageViewers.pop_front();
-        //todo load next
-        item->setY(pageViewers.last()->y()+pageViewers.last()->getFullSize().height());
 
+        //todo load next
+        QString file=fileManager.next();
+        item->getImage()->load(file);
+        item->setFilePath(file);
+        item->setY(pageViewers.last()->y()+pageViewers.last()->getFullSize().height());
+        item->setX((scene.width() - item->getFullSize().width())/2);
+        pageFiles.push_back(file);
         pageViewers.push_back(item);
+        if(!fileManager.hasNext())
+            isLastPage=true;
     }
 }
 
 void QGraphicsManagaView::back(qreal step)
 {
+    if(pageViewers.size()==0)
+        return;
+    if(step==0)
+        step=0.5;
+    bool needNextPage=false;
+    qreal distance=isFirstPage?-pageViewers.first()->y():scene.height()*step;
+    distance=std::min(distance,scene.height()*step);
+    for(int i=0;i<pageViewers.size();i++)
+    {
+        pageViewers.at(i)->moveBy(0,distance);
+        if(pageViewers.at(i)->y()>scene.height())
+            needNextPage=true;
+    }
+    if(needNextPage &&(!isFirstPage))
+    {
+
+        isLastPage=false;
+        QGraphicsPagedPixmapItem *item=pageViewers.last();
+        pageViewers.pop_back();
+        //todo load previous
+        int index=pageFiles.indexOf(pageViewers.first()->getFilePath())-1;
+        QString file=pageFiles.at(index);
+
+        pageFiles.pop_back();
+        item->getImage()->load(file);
+        item->setFilePath(file);
+        item->setY(pageViewers.first()->y()-pageViewers.first()->getFullSize().height());
+        item->setX((scene.width() - item->getFullSize().width())/2);
+
+        if(index==0)
+            isFirstPage=true;
+        pageViewers.push_front(item);
+    }
 }
 
 void QGraphicsManagaView::resizeEvent(QResizeEvent *event)
@@ -83,4 +203,53 @@ void QGraphicsManagaView::resizeEvent(QResizeEvent *event)
         pageViewers.at(i)->setPos((scene.width()- pageViewers.at(i)->getPageSize().width())/2, pageViewers.at(i)->y());
     }
 
+}
+void QGraphicsManagaView::mousePressEvent(QMouseEvent *event)
+{
+    CommandRegistry::get(modCMD(event)+"M"+(QString::number(event->button())))->execute(this);
+}
+
+void QGraphicsManagaView::setScale(qreal rate)
+{
+    this->rate=rate;
+    for(int i=0;i<pageViewers.size();i++)
+    {
+        qreal fitrate=scene.width()/pageViewers.at(i)->getBaseSize().width();
+        pageViewers.at(i)->setScale(rate==-1?fitrate:std::min(rate,fitrate));
+    }
+    adjustPages();
+}
+qreal QGraphicsManagaView::getScale( )
+{
+   return rate;
+}
+QString QGraphicsManagaView::modCMD(QInputEvent *event)
+{
+    if(event->modifiers().testFlag(Qt::NoModifier))
+        return "";
+    QString cmd="";
+    if(event->modifiers().testFlag(Qt::ControlModifier))
+        cmd+="C+";
+    if(event->modifiers().testFlag(Qt::ShiftModifier))
+        cmd+="S+";
+    if(event->modifiers().testFlag(Qt::AltModifier))
+        cmd+="A+";
+    return cmd;
+}
+
+void QGraphicsManagaView::wheelEvent(QWheelEvent *event)
+{
+    QString base="";
+    qDebug()<<event->modifiers().testFlag(Qt::ControlModifier);
+    qDebug()<<event->modifiers().testFlag(Qt::ShiftModifier);
+    if(event->delta()>0)
+        CommandRegistry::get(modCMD(event)+"Wup")->execute(this);
+    else
+         CommandRegistry::get(modCMD(event)+"Wdown")->execute(this);
+}
+
+void QGraphicsManagaView::keyReleaseEvent(QKeyEvent *event)
+{
+    qDebug()<<event->key();
+    CommandRegistry::get(modCMD(event)+"K"+(QString::number(event->key())))->execute(this);
 }

@@ -214,14 +214,24 @@ int FileManager::loadFromPreviousFolder()
 
 }
 
-QList<QString> FileManager::list()
+QList<QString> &FileManager::list()
 {
-
+    return (QList<QString> &)fileListInCurrentFolder;
 }
 
 int FileManager::size()
 {
-return 0;
+    return fileListInCurrentFolder->size();
+}
+
+bool FileManager::hasNext()
+{
+    return currentIndex==fileListInCurrentFolder->size()-1;
+}
+
+bool FileManager::hasPrevious()
+{
+    return currentIndex>0;
 }
 bool FileManager::isSuffixAcceptable(QString suffix)
 {
