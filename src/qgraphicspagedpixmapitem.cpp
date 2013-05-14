@@ -96,11 +96,14 @@ void QGraphicsPagedPixmapItem::doSplitPage()
     }
     pageCount=2;
     pageSize.setWidth(image->width()/2);
-
+    QPixmap map;
+    map.toImage().scanLine(1);
     //splittedPages.first()->setPos(splittedPages.first()->mapToItem(this,0,0));
     splittedPages.first()->setY(0);
 //    splittedPages.first()->pixmap()
+
     splittedPages.first()->setPixmap(image->copy(pageSize.width(),0,pageSize.width(),pageSize.height()));
+//    splittedPages.first()->setPixmap((QPixmap &)*image);
     splittedPages.last()->setY(pageSize.height());
     //delete &splittedPages.last()->pixmap();
     splittedPages.last()->setPixmap(image->copy(0,0,pageSize.width(),pageSize.height()));

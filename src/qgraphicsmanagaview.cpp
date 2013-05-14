@@ -14,14 +14,15 @@
 #include <algorithm>
 QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageIndexs(),fileManager(),rate(1)
+    ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageIndexs(),fileManager(),rate(1),
+    setting(QApplication::applicationDirPath ()+"/settings.ini",QSettings::IniFormat)
 {
     ui->setupUi(this);
     ui->graphicsView->setScene(&scene);
     scene.setBackgroundBrush(QBrush(Qt::black));
-    ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    QSettings setting(QApplication::applicationDirPath ()+"/settings.ini",QSettings::IniFormat);
+//    ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//    ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ;
     setting.beginGroup("keys");
     QStringList list=setting.childKeys();
     for(int i=0;i<list.size();i++)
@@ -34,6 +35,29 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
             CommandRegistry::map(valueList.at(j),"Viewer"+key+"Command");
         }
     }
+    setting.endGroup();
+    setting.beginGroup("lastread");
+    QString folder=setting.value("lastfolder").toString();
+    QString file=setting.value("lastfile").toString();
+    qreal width=setting.value("width").toReal();
+    qreal height=setting.value("height").toReal();
+    setting.endGroup();
+    if(folder!="")
+    {
+        pageIndexs.clear();
+        fileManager.load(folder);
+    }
+    if(file!="")
+    {
+        int index=fileManager.get(file);
+        if(index!=-1)
+            init(index);
+    }
+    else
+        init();
+
+    if((width>0)&&(height>0))
+        this->resize(width,height);
 
 }
 
@@ -45,13 +69,13 @@ int QGraphicsManagaView::load(QString fileorpath)
     init();
 }
 
-void QGraphicsManagaView::init()
+void QGraphicsManagaView::init(int index)
 {
-    int pageCount=0;
+    int pageCount=index;
     qreal totalHeight=0;
     isFirstPage=true;
     isLastPage=fileManager.size()==1;
-    while(totalHeight<scene.height()||pageCount<=1)
+    while(totalHeight<scene.height()||pageCount<=index+1)
     {
         QString file=fileManager.get(pageCount);
         if(file=="")
@@ -97,26 +121,34 @@ void QGraphicsManagaView::init()
             pageViewers.removeLast();
         }
     }
+    if(pageCount==0)
+        return;
 
     adjustPages();
-
+updateTitle();
 }
 
 void QGraphicsManagaView::adjustPages()
 {
     if(pageViewers.isEmpty())
         return;
-    pageViewers.first()->setX((scene.width() - pageViewers.first()->getFullSize().width())/2);
+    for(int i=0;i<pageViewers.size();i++)
+    {
+        pageViewers.at(i)->setScale(scene.width()/pageViewers.at(i)->getBaseSize().width());
+    }
+//    pageViewers.first()->setX((scene.width() - pageViewers.first()->getFullSize().width())/2);
+
     if(pageViewers.first()->y()>0)
         pageViewers.first()->setY(0);
     qreal ypos=pageViewers.first()->getFullSize().height();
     for(int i=1;i<pageViewers.size();i++)
     {
-
-        pageViewers.at(i)->setX((scene.width() - pageViewers.at(i)->getFullSize().width())/2);
+pageViewers.at(i)->setX(0);
+//        pageViewers.at(i)->setX((scene.width() - pageViewers.at(i)->getFullSize().width())/2);
         pageViewers.at(i)->setY(ypos);
         ypos+=pageViewers.at(i)->getFullSize().height();
     }
+
 }
 
 QGraphicsManagaView::~QGraphicsManagaView()
@@ -129,9 +161,13 @@ void QGraphicsManagaView::go(qreal step)
     if(pageViewers.size()==0)
         return;
     if(step==0)
-        step=0.3;
+        step=0.2;
     bool needNextPage=false;
-    qreal distance=isLastPage?scene.height()-pageViewers.last()->getFullSize().height()-pageViewers.last()->y():-scene.height()*step;
+    qreal distance=0;
+//    if(step==0)
+//        distance=-pageViewers.first()->getFullSize().height();
+//        else
+    distance=isLastPage?scene.height()-pageViewers.last()->getFullSize().height()-pageViewers.last()->y():-scene.height()*step;
     distance=std::max(distance,-scene.height()*step);
     for(int i=0;i<pageViewers.size();i++)
     {
@@ -159,6 +195,11 @@ void QGraphicsManagaView::go(qreal step)
         pageIndexs.push_back(lastIndexInView+1);
         pageViewers.push_back(item);
     }
+    updateTitle();
+}
+void QGraphicsManagaView::updateTitle()
+{
+    this->setWindowTitle(QString::number(pageIndexs.first()+1)+"/"+QString::number(fileManager.size()+1)+" "+fileManager.currentFolder());
 }
 
 void QGraphicsManagaView::back(qreal step)
@@ -166,7 +207,7 @@ void QGraphicsManagaView::back(qreal step)
     if(pageViewers.size()==0)
         return;
     if(step==0)
-        step=0.3;
+        step=0.2;
     bool needNextPage=false;
     qreal distance=isFirstPage?-pageViewers.first()->y():scene.height()*step;
     distance=std::min(distance,scene.height()*step);
@@ -203,9 +244,7 @@ void QGraphicsManagaView::back(qreal step)
 void QGraphicsManagaView::resizeEvent(QResizeEvent *event)
 {
     scene.setSceneRect(QRect(QPoint(0,0),this->size()));
-    for(int i=0;i<pageViewers.size();i++){
-        pageViewers.at(i)->setPos((scene.width()- pageViewers.at(i)->getPageSize().width())/2, pageViewers.at(i)->y());
-    }
+    adjustPages();
 
 }
 void QGraphicsManagaView::mousePressEvent(QMouseEvent *event)
@@ -221,7 +260,6 @@ void QGraphicsManagaView::setScale(qreal rate)
         qreal fitrate=scene.width()/pageViewers.at(i)->getBaseSize().width();
         pageViewers.at(i)->setScale(rate==-1?fitrate:std::min(rate,fitrate));
     }
-    adjustPages();
 }
 qreal QGraphicsManagaView::getScale( )
 {
@@ -254,4 +292,15 @@ void QGraphicsManagaView::keyReleaseEvent(QKeyEvent *event)
 {
     qDebug()<<event->key();
     CommandRegistry::get(modCMD(event)+"K"+(QString::number(event->key())))->execute(this);
+}
+void QGraphicsManagaView::closeEvent(QCloseEvent *event)
+{
+    if(pageViewers.size()==0)
+        return;
+    setting.beginGroup("lastread");
+    setting.setValue("lastfolder",fileManager.currentFolder());
+    setting.setValue("lastfile",pageViewers.first()->getFilePath());
+    setting.setValue("width",scene.width());
+    setting.setValue("height",scene.height());
+    setting.endGroup();
 }

@@ -233,11 +233,21 @@ bool FileManager::hasPrevious()
 {
     return currentIndex>0;
 }
+
+QString FileManager::currentFolder()
+{
+    return folderStack->top();
+}
 QString FileManager::get(int index)
 {
     if(fileListInCurrentFolder->size()-1==index)
         return "";
     return fileListInCurrentFolder->at(index);
+}
+
+int FileManager::get(QString fileName)
+{
+    return fileListInCurrentFolder->indexOf(fileName);
 }
 
 bool FileManager::isSuffixAcceptable(QString suffix)
