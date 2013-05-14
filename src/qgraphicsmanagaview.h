@@ -35,7 +35,7 @@ private:
     Ui::QGraphicsManagaView *ui;
     QGraphicsScene scene;
     QQueue<QGraphicsPagedPixmapItem*> pageViewers;
-    QQueue<QString> pageFiles;
+    QQueue<int> pageIndexs;
     FileManager fileManager;
     bool isLastPage;
     bool isFirstPage;

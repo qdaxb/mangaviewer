@@ -14,7 +14,7 @@
 #include <algorithm>
 QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageFiles(),fileManager(),rate(1)
+    ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageIndexs(),fileManager(),rate(1)
 {
     ui->setupUi(this);
     ui->graphicsView->setScene(&scene);
@@ -40,7 +40,7 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
 
 int QGraphicsManagaView::load(QString fileorpath)
 {
-    pageFiles.clear();
+    pageIndexs.clear();
     fileManager.load(fileorpath);
     init();
 }
@@ -53,7 +53,7 @@ void QGraphicsManagaView::init()
     isLastPage=fileManager.size()==1;
     while(totalHeight<scene.height()||pageCount<=1)
     {
-        QString file=fileManager.next();
+        QString file=fileManager.get(pageCount);
         if(file=="")
             break;
         QPixmap *image;
@@ -83,7 +83,7 @@ void QGraphicsManagaView::init()
             pageViewers.at(pageCount)->setFilePath(file);
 
         }
-        pageFiles.push_back(file);
+        pageIndexs.push_back(pageCount);
         pageCount++;
         totalHeight+=pageViewers.last()->getFullSize().height();
 
@@ -129,7 +129,7 @@ void QGraphicsManagaView::go(qreal step)
     if(pageViewers.size()==0)
         return;
     if(step==0)
-        step=0.5;
+        step=0.3;
     bool needNextPage=false;
     qreal distance=isLastPage?scene.height()-pageViewers.last()->getFullSize().height()-pageViewers.last()->y():-scene.height()*step;
     distance=std::max(distance,-scene.height()*step);
@@ -145,17 +145,19 @@ void QGraphicsManagaView::go(qreal step)
         isFirstPage=false;
         QGraphicsPagedPixmapItem *item=pageViewers.first();
         pageViewers.pop_front();
-
+        pageIndexs.pop_front();
         //todo load next
-        QString file=fileManager.next();
+        int lastIndexInView=pageIndexs.last();
+        QString file=fileManager.get(lastIndexInView+1);
+        if(file=="")
+            isLastPage=true;
         item->getImage()->load(file);
+        item->updateImage();
         item->setFilePath(file);
         item->setY(pageViewers.last()->y()+pageViewers.last()->getFullSize().height());
         item->setX((scene.width() - item->getFullSize().width())/2);
-        pageFiles.push_back(file);
+        pageIndexs.push_back(lastIndexInView+1);
         pageViewers.push_back(item);
-        if(!fileManager.hasNext())
-            isLastPage=true;
     }
 }
 
@@ -164,7 +166,7 @@ void QGraphicsManagaView::back(qreal step)
     if(pageViewers.size()==0)
         return;
     if(step==0)
-        step=0.5;
+        step=0.3;
     bool needNextPage=false;
     qreal distance=isFirstPage?-pageViewers.first()->y():scene.height()*step;
     distance=std::min(distance,scene.height()*step);
@@ -180,19 +182,21 @@ void QGraphicsManagaView::back(qreal step)
         isLastPage=false;
         QGraphicsPagedPixmapItem *item=pageViewers.last();
         pageViewers.pop_back();
+        pageIndexs.pop_back();
         //todo load previous
-        int index=pageFiles.indexOf(pageViewers.first()->getFilePath())-1;
-        QString file=pageFiles.at(index);
-
-        pageFiles.pop_back();
+        int index=pageIndexs.first();
+        QString file=fileManager.get(index-1);
+        qDebug()<<file<<"  "<<index;
         item->getImage()->load(file);
+        item->updateImage();
         item->setFilePath(file);
-        item->setY(pageViewers.first()->y()-pageViewers.first()->getFullSize().height());
+        item->setY(pageViewers.first()->y()-item->getFullSize().height());
         item->setX((scene.width() - item->getFullSize().width())/2);
 
-        if(index==0)
+        if(index==1)
             isFirstPage=true;
         pageViewers.push_front(item);
+        pageIndexs.push_front(index-1);
     }
 }
 
@@ -240,8 +244,6 @@ QString QGraphicsManagaView::modCMD(QInputEvent *event)
 void QGraphicsManagaView::wheelEvent(QWheelEvent *event)
 {
     QString base="";
-    qDebug()<<event->modifiers().testFlag(Qt::ControlModifier);
-    qDebug()<<event->modifiers().testFlag(Qt::ShiftModifier);
     if(event->delta()>0)
         CommandRegistry::get(modCMD(event)+"Wup")->execute(this);
     else

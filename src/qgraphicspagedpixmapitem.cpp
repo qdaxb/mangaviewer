@@ -25,7 +25,6 @@ QRectF QGraphicsPagedPixmapItem::boundingRect() const
 
 void QGraphicsPagedPixmapItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    qDebug()<<"paint";
     for(int i=0;i<2;i++)
     {
        // splittedPages.at(i)->paint(painter,option,widget);
@@ -41,8 +40,7 @@ void QGraphicsPagedPixmapItem::setImage(QPixmap *image)
     {
         splittedPages.at(i)->setPixmap((QPixmap&)(*image));
     }
-    doSplitPage();
-
+    updateImage();
 }
 
 QSize QGraphicsPagedPixmapItem::getPageSize()
@@ -71,6 +69,12 @@ QSize QGraphicsPagedPixmapItem::getImageSize()
     return image->size();
 }
 
+void QGraphicsPagedPixmapItem::updateImage()
+{
+
+    doSplitPage();
+}
+
 bool QGraphicsPagedPixmapItem::needSplit()
 {
     if(image->height()<image->width())
@@ -86,6 +90,8 @@ void QGraphicsPagedPixmapItem::doSplitPage()
     {
         pageCount=1;
         pageSize.setWidth(image->width());
+        splittedPages.first()->setY(0);
+        splittedPages.first()->setPixmap((QPixmap &)*image);
         return;
     }
     pageCount=2;
@@ -93,11 +99,11 @@ void QGraphicsPagedPixmapItem::doSplitPage()
 
     //splittedPages.first()->setPos(splittedPages.first()->mapToItem(this,0,0));
     splittedPages.first()->setY(0);
-
-
-    splittedPages.first()->setPixmap(image->copy(0,0,pageSize.width(),pageSize.height()));
+//    splittedPages.first()->pixmap()
+    splittedPages.first()->setPixmap(image->copy(pageSize.width(),0,pageSize.width(),pageSize.height()));
     splittedPages.last()->setY(pageSize.height());
-    splittedPages.last()->setPixmap(image->copy(pageSize.width(),0,pageSize.width(),pageSize.height()));
+    //delete &splittedPages.last()->pixmap();
+    splittedPages.last()->setPixmap(image->copy(0,0,pageSize.width(),pageSize.height()));
 
 }
 

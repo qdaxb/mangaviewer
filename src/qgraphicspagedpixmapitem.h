@@ -22,6 +22,7 @@ public:
     QPixmap *getImage(){return image;}
     void setFilePath(QString filePath){this->filePath=filePath;}
     QString getFilePath(){return filePath;}
+    void updateImage();
 private:
     bool needSplit();
     QString filePath;

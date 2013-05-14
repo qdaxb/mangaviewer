@@ -226,13 +226,20 @@ int FileManager::size()
 
 bool FileManager::hasNext()
 {
-    return currentIndex==fileListInCurrentFolder->size()-1;
+    return currentIndex!=fileListInCurrentFolder->size()-1;
 }
 
 bool FileManager::hasPrevious()
 {
     return currentIndex>0;
 }
+QString FileManager::get(int index)
+{
+    if(fileListInCurrentFolder->size()-1==index)
+        return "";
+    return fileListInCurrentFolder->at(index);
+}
+
 bool FileManager::isSuffixAcceptable(QString suffix)
 {
     QString lowersuffix=suffix.toLower();

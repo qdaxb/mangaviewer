@@ -19,6 +19,7 @@ public:
     virtual int size();
     virtual bool hasNext();
     virtual bool hasPrevious();
+    QString get(int index);
 private:
     QList<QString>* fileListInCurrentFolder;
     QStack<QString>* folderStack;
