@@ -6,7 +6,6 @@
 #include "common.h"
 #include <QQueue>
 #include "filemanager.h"
-#include <QSettings>
 class QGraphicsPagedPixmapItem;
 
 namespace Ui {
@@ -29,10 +28,8 @@ public:
     void setScale(qreal rate);
     void wheelEvent(QWheelEvent *);
     qreal getScale();
-    void closeEvent(QCloseEvent *event);
-    void updateTitle();
 private:
-    void init(int index=0);
+    void init();
     void adjustPages();
     QString modCMD(QInputEvent *event);
     Ui::QGraphicsManagaView *ui;
@@ -43,7 +40,6 @@ private:
     bool isLastPage;
     bool isFirstPage;
     qreal rate;
-    QSettings setting;
 };
 
 #endif // QGRAPHICSMANAGAVIEW_H

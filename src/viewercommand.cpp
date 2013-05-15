@@ -44,18 +44,33 @@ REGISTER_COMMAND(ViewerGoCommand)
 void ViewerGoCommand::execute(QGraphicsManagaView *viewer)
 {
 
+    //        QString dir =QFileDialog::getExistingDirectory(0, ("Open Directory"),
+    //                                                       "",
+    //                                                      QFileDialog::ShowDirsOnly
+    //                                                      );
+    //       if(dir=="")
+    //        {
+    //            return;
+    //        }
+    //       viewer->load(dir);
     viewer->go();
+    viewer->update();
 }
 
 REGISTER_COMMAND(ViewerBackCommand)
 void ViewerBackCommand::execute(QGraphicsManagaView *viewer)
 {
     viewer->back();
+    //    viewer->getWidget()->update();
 }
 
 REGISTER_COMMAND(ViewerNextPageCommand)
 void ViewerNextPageCommand::execute(QGraphicsManagaView *viewer)
 {
+    //    FileManager *manager=viewer->getFileManager();
+    //    manager->next();
+    //    viewer->update();
+    //    viewer->getWidget()->update();
 }
 
 REGISTER_COMMAND(ViewerPreviousPageCommand)
@@ -67,13 +82,14 @@ void ViewerPreviousPageCommand::execute(QGraphicsManagaView *viewer)
 REGISTER_COMMAND(ViewerScaleUpCommand)
 void ViewerScaleUpCommand::execute(QGraphicsManagaView *viewer)
 {
-
-    viewer->resize(viewer->width()*1.1,viewer->height()*1.1);
-    //viewer->setScale(viewer->getScale()+0.1);
+    if(viewer->getScale()==-1)
+        viewer->setScale(1);
+    viewer->setScale(viewer->getScale()+0.1);
 }
 REGISTER_COMMAND(ViewerScaleDownCommand)
 void ViewerScaleDownCommand::execute(QGraphicsManagaView *viewer)
 {
-
-    viewer->resize(viewer->width()*0.9,viewer->height()*0.9);
+    if(viewer->getScale()==-1)
+        viewer->setScale(1);
+    viewer->setScale(viewer->getScale()-0.1);
 }
