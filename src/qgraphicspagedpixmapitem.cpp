@@ -31,15 +31,15 @@ void QGraphicsPagedPixmapItem::paint(QPainter *painter, const QStyleOptionGraphi
     }
 }
 
-void QGraphicsPagedPixmapItem::setImage(QPixmap *image)
+void QGraphicsPagedPixmapItem::setImage(QImage *image)
 {
     if(image==NULL)
         return;
     this->image=image;
-    for(int i=0;i<2;i++)
-    {
-        splittedPages.at(i)->setPixmap((QPixmap&)(*image));
-    }
+//    for(int i=0;i<2;i++)
+//    {
+//        splittedPages.at(i)->setPixmap((QPixmap&)(*image));
+//    }
     updateImage();
 }
 
@@ -82,31 +82,40 @@ bool QGraphicsPagedPixmapItem::needSplit()
     return false;
 }
 
+void QGraphicsPagedPixmapItem::detimeRects(){
+    QRgb *pixel=(QRgb*)image->bits();
+    pixel+=image->width();
+    pixel+=image->width();
+    pixel+=image->width();
+
+
+
+}
+
 void QGraphicsPagedPixmapItem::doSplitPage()
 {
     prepareGeometryChange();
     pageSize.setHeight(image->height());
+
     if(!needSplit())
     {
         pageCount=1;
         pageSize.setWidth(image->width());
         splittedPages.first()->setY(0);
-        splittedPages.first()->setPixmap((QPixmap &)*image);
+        splittedPages.first()->setPixmap(QPixmap::fromImage(*image));
         return;
     }
     pageCount=2;
     pageSize.setWidth(image->width()/2);
-    QPixmap map;
-    map.toImage().scanLine(1);
     //splittedPages.first()->setPos(splittedPages.first()->mapToItem(this,0,0));
     splittedPages.first()->setY(0);
 //    splittedPages.first()->pixmap()
 
-    splittedPages.first()->setPixmap(image->copy(pageSize.width(),0,pageSize.width(),pageSize.height()));
+    splittedPages.first()->setPixmap(QPixmap::fromImage(image->copy(pageSize.width(),0,pageSize.width(),pageSize.height())));
 //    splittedPages.first()->setPixmap((QPixmap &)*image);
     splittedPages.last()->setY(pageSize.height());
     //delete &splittedPages.last()->pixmap();
-    splittedPages.last()->setPixmap(image->copy(0,0,pageSize.width(),pageSize.height()));
+    splittedPages.last()->setPixmap(QPixmap::fromImage(image->copy(0,0,pageSize.width(),pageSize.height())));
 
 }
 

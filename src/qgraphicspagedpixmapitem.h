@@ -14,15 +14,16 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     void setPageSplitMode(int mode){this->splitMode=mode;}
     int getPageCount(){return pageCount;}
-    void setImage(QPixmap *image);
+    void setImage(QImage *image);
     QSize getPageSize();
     QSize getFullSize();
     QSize getBaseSize();
     QSize getImageSize();
-    QPixmap *getImage(){return image;}
+    QImage *getImage(){return image;}
     void setFilePath(QString filePath){this->filePath=filePath;}
     QString getFilePath(){return filePath;}
     void updateImage();
+    void detimeRects();
 private:
     bool needSplit();
     QString filePath;
@@ -31,7 +32,8 @@ private:
     int pageCount;
     int currentIndex;
     QList<QGraphicsPixmapItem*> splittedPages;
-    QPixmap *image;
+    QImage *image;
+    QPixmap *pixmap;
     QSize pageSize;
 signals:
     

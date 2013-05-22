@@ -1,5 +1,4 @@
 #include "viewercommand.h"
-#include "mangaviewer.h"
 #include <QFileDialog>
 #include <QString>
 #include <QDebug>

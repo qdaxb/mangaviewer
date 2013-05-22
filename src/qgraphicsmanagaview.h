@@ -20,8 +20,8 @@ class QGraphicsManagaView : public QWidget
 public:
     explicit QGraphicsManagaView(QWidget *parent = 0);
     ~QGraphicsManagaView();
-    void go(qreal step=0);
-    void back(qreal step=0);
+    void go(qreal step=0.2);
+    void back(qreal step=0.2);
     void resizeEvent(QResizeEvent *event);
     void keyReleaseEvent(QKeyEvent *);
     int load(QString fileorpath);
@@ -31,6 +31,7 @@ public:
     qreal getScale();
     void closeEvent(QCloseEvent *event);
     void updateTitle();
+    void calucateItem();
 private:
     void init(int index=0);
     void adjustPages();

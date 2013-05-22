@@ -69,8 +69,15 @@ int QGraphicsManagaView::load(QString fileorpath)
     init();
 }
 
+void QGraphicsManagaView::calucateItem()
+{
+
+}
+
 void QGraphicsManagaView::init(int index)
 {
+    if(fileManager.size()==0)
+        return;
     int pageCount=index;
     qreal totalHeight=0;
     isFirstPage=true;
@@ -80,7 +87,7 @@ void QGraphicsManagaView::init(int index)
         QString file=fileManager.get(pageCount);
         if(file=="")
             break;
-        QPixmap *image;
+        QImage *image;
         if(pageViewers.size()<=pageCount)
         {
             QGraphicsPagedPixmapItem *pageViewer=new QGraphicsPagedPixmapItem();
@@ -88,7 +95,7 @@ void QGraphicsManagaView::init(int index)
             //todo split mode
             pageViewer->setPageSplitMode(Manga::SPLIT_AUTO);
             scene.addItem(pageViewer);
-            image=new QPixmap(file);
+            image=new QImage(file);
             pageViewer->setImage(image);
             pageViewer->setFilePath(file);
             pageViewers.push_back(pageViewer);
@@ -100,7 +107,7 @@ void QGraphicsManagaView::init(int index)
             image=pageViewers.at(pageCount)->getImage();
             if(image==NULL)
             {
-                image=new QPixmap();
+                image=new QImage();
             }
             image->load(file);
             pageViewers.at(pageCount)->setImage(image);
@@ -125,7 +132,7 @@ void QGraphicsManagaView::init(int index)
         return;
 
     adjustPages();
-updateTitle();
+    updateTitle();
 }
 
 void QGraphicsManagaView::adjustPages()
@@ -136,18 +143,16 @@ void QGraphicsManagaView::adjustPages()
     {
         pageViewers.at(i)->setScale(scene.width()/pageViewers.at(i)->getBaseSize().width());
     }
-//    pageViewers.first()->setX((scene.width() - pageViewers.first()->getFullSize().width())/2);
 
     if(pageViewers.first()->y()>0)
         pageViewers.first()->setY(0);
-    qreal ypos=pageViewers.first()->getFullSize().height();
+    qreal ypos=pageViewers.first()->getFullSize().height()+pageViewers.first()->y();
     for(int i=1;i<pageViewers.size();i++)
     {
-pageViewers.at(i)->setX(0);
-//        pageViewers.at(i)->setX((scene.width() - pageViewers.at(i)->getFullSize().width())/2);
         pageViewers.at(i)->setY(ypos);
         ypos+=pageViewers.at(i)->getFullSize().height();
     }
+    go(0);
 
 }
 
@@ -160,8 +165,6 @@ void QGraphicsManagaView::go(qreal step)
 {
     if(pageViewers.size()==0)
         return;
-    if(step==0)
-        step=0.2;
     bool needNextPage=false;
     qreal distance=0;
 //    if(step==0)
@@ -188,6 +191,7 @@ void QGraphicsManagaView::go(qreal step)
         if(file=="")
             isLastPage=true;
         item->getImage()->load(file);
+
         item->updateImage();
         item->setFilePath(file);
         item->setY(pageViewers.last()->y()+pageViewers.last()->getFullSize().height());
