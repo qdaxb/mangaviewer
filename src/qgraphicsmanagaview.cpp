@@ -67,6 +67,7 @@ int QGraphicsManagaView::load(QString fileorpath)
     pageIndexs.clear();
     fileManager.load(fileorpath);
     init();
+    return 0;
 }
 
 void QGraphicsManagaView::calucateItem()

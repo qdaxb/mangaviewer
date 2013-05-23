@@ -36,6 +36,7 @@ int MsgPainter::toggleMessage(MsgPainter::PositionFlag position)
     {
         bottomMessage.isShow=!isShow;
     }
+    return 0;
 }
 
 bool MsgPainter::isShowMessage(MsgPainter::PositionFlag position)
@@ -69,6 +70,7 @@ int MsgPainter::showMessage(QString message, MsgPainter::PositionFlag position)
     {
         bottomMessage.isShow=true;
     }
+    return 0;
 }
 int MsgPainter::setMessage(QString message, MsgPainter::PositionFlag position)
 {
@@ -87,6 +89,7 @@ int MsgPainter::setMessage(QString message, MsgPainter::PositionFlag position)
         bottomMessage.message.clear();
         bottomMessage.message.append(message);
     }
+    return 0;
 }
 
 int MsgPainter::showListMessage(QStringList messages, MsgPainter::PositionFlag position)
@@ -109,6 +112,7 @@ int MsgPainter::showListMessage(QStringList messages, MsgPainter::PositionFlag p
         bottomMessage.message.append(messages);
         bottomMessage.isShow=true;
     }
+    return 0;
 }
 
 void MsgPainter::hideMessage(int position)
