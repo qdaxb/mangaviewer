@@ -6,6 +6,8 @@
 #include <QSettings>
 #include <QApplication>
 #include <algorithm>
+#include <QUrl>
+#include <QFileInfo>
 #include "filemanager.h"
 #include "commandregistry.h"
 #include "viewercommand.h"
@@ -19,6 +21,7 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->graphicsView->setScene(&scene);
+    ui->graphicsView->setAcceptDrops(false);
     scene.setBackgroundBrush(QBrush(Qt::black));
     setting.beginGroup("keys");
     QStringList list=setting.childKeys();
@@ -55,7 +58,8 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
 
     if((width>0)&&(height>0))
         this->resize(width,height);
-
+    updateTitle();
+    this->setAcceptDrops(true);
 }
 
 
@@ -63,7 +67,12 @@ int QGraphicsManagaView::load(QString fileorpath)
 {
     pageIndexs.clear();
     fileManager.load(fileorpath);
-    init();
+    QFileInfo file(fileorpath);
+    int index=fileManager.get(file.fileName());
+    if(index!=-1)
+    init(index);
+    else
+        init();
     return 0;
 }
 
@@ -75,7 +84,14 @@ void QGraphicsManagaView::calucateItem()
 void QGraphicsManagaView::init(int index)
 {
     if(fileManager.size()==0)
+    {
+        for(int i=0;i<pageViewers.size();i++)
+        {
+            delete pageViewers.at(i);
+        }
+        pageViewers.clear();
         return;
+    }
     int pageCount=index;
     qreal totalHeight=0;
     isFirstPage=index==0;
@@ -86,7 +102,7 @@ void QGraphicsManagaView::init(int index)
         if(file=="")
             break;
         QImage *image;
-        if(pageViewers.size()<=pageCount)
+        if(pageViewers.size()<=pageCount-index)
         {
             QGraphicsPagedPixmapItem *pageViewer=new QGraphicsPagedPixmapItem();
 
@@ -103,14 +119,14 @@ void QGraphicsManagaView::init(int index)
         else
         {
 
-            image=pageViewers.at(pageCount)->getImage();
+            image=pageViewers.at(pageCount-index)->getImage();
             if(image==NULL)
             {
                 image=new QImage();
             }
             image->loadFromData(fileManager.loadData(pageCount));
-            pageViewers.at(pageCount)->setImage(image);
-            pageViewers.at(pageCount)->setFilePath(file);
+            pageViewers.at(pageCount-index)->setImage(image);
+            pageViewers.at(pageCount-index)->setFilePath(file);
 
         }
         pageIndexs.push_back(pageCount);
@@ -124,6 +140,7 @@ void QGraphicsManagaView::init(int index)
         for(int i=pageCount;i<totalSize;i++)
         {
             scene.removeItem(pageViewers.last());
+            delete pageViewers.last();
             pageViewers.removeLast();
         }
     }
@@ -200,7 +217,10 @@ void QGraphicsManagaView::go(qreal step)
 }
 void QGraphicsManagaView::updateTitle()
 {
-    this->setWindowTitle(QString::number(pageIndexs.first()+1)+"/"+QString::number(fileManager.size()+1)+" "+fileManager.currentFolder());
+    if(fileManager.size()==0)
+        this->setWindowTitle("axb's MangaViewer");
+    else
+        this->setWindowTitle(QString::number(pageIndexs.first()+1)+"/"+QString::number(fileManager.size()+1)+" "+fileManager.currentFolder());
 }
 
 void QGraphicsManagaView::back(qreal step)
@@ -228,8 +248,8 @@ void QGraphicsManagaView::back(qreal step)
         //todo load previous
         int index=pageIndexs.first();
         QString file=fileManager.get(index-1);
-        qDebug()<<file<<"  "<<index;
-        item->getImage()->load(file);
+        item->getImage()->loadFromData(fileManager.loadData(index-1));
+
         item->updateImage();
         item->setFilePath(file);
         item->setY(pageViewers.first()->y()-item->getFullSize().height());
@@ -239,6 +259,38 @@ void QGraphicsManagaView::back(qreal step)
             isFirstPage=true;
         pageViewers.push_front(item);
         pageIndexs.push_front(index-1);
+    }
+    updateTitle();
+}
+
+void QGraphicsManagaView::nextPage()
+{
+}
+
+void QGraphicsManagaView::perviousPage()
+{
+}
+
+void QGraphicsManagaView::dropEvent(QDropEvent *event)
+{
+    if(event->mimeData()->hasUrls())
+    {
+        QUrl url=event->mimeData()->urls().first();
+        QString path=url.path();
+        path=path.right(path.length()-1);
+        QFile file(path);
+       if(file.exists())
+       {
+           load(path);
+       }
+    }
+
+}
+
+void QGraphicsManagaView::dragEnterEvent(QDragEnterEvent *event)
+{if(event->mimeData()->hasUrls())
+    {
+        event->acceptProposedAction();
     }
 }
 

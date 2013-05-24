@@ -8,7 +8,7 @@
 #include "localfolderloader.h"
 FileManager::FileManager()
 {
-    fileListInCurrentFolder=new QList<QString>();
+    fileListInCurrentFolder=new QStringList();
     folderStack=new QStack<FolderLoader*>();
     currentFolderLoader=NULL;
 }
@@ -63,9 +63,39 @@ QString FileManager::nextFolder()
 
 QString FileManager::previousFolder()
 {
-    //enter sibling folder
+    while(true){
+        //load parent
+        if(folderStack->empty())
+        {
+            QFileInfo folderInfo(currentFolderLoader->path());
+            QDir parentFolder=folderInfo.absoluteDir();
+            folderStack->push(new LocalFolderLoader(parentFolder.absolutePath()));
+        }
+
+        FolderLoader *parent=folderStack->top();
+        folderStack->pop();
+        QStringList folderList=parent->folderList();
+
+        int index=folderList.indexOf(currentFolderLoader->path());
+        QString siblingPath;
+        //current at the end
+        if(index==0)
+        {
+            //calucate parent and push it into stack
+            delete currentFolderLoader;
+            currentFolderLoader=parent;
+            continue;
+        }
+        else
+        {
+            siblingPath=folderList.at(index-1);
+        }
+        load(siblingPath);
+        break;
+    }
 
     //enter parent folder
+    return currentFolder();
 
 }
 
@@ -111,6 +141,7 @@ int FileManager::loadFromZipFile(QString path)
     folderStack->push(currentFolderLoader);
     fileListInCurrentFolder->clear();
     fileListInCurrentFolder->append(currentFolderLoader->fileList());
+    fileListInCurrentFolder->sort();
 }
 
 int FileManager::loadFromFolder(QString path)
@@ -188,6 +219,7 @@ QByteArray FileManager::loadData(int index)
 
 int FileManager::get(QString fileName)
 {
+
     return fileListInCurrentFolder->indexOf(fileName);
 }
 

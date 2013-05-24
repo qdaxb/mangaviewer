@@ -23,16 +23,14 @@ QStringList ZipFileLoader::fileList()
 {
     if(zippedFileNames.isEmpty())
     {while(!fex_done(fex))
-    {
-        const char *cha=fex_name(fex);
-        QString name=QString::fromLatin1(cha);
-        zippedFileNames.append(name);
-        fex_next(fex);
-        currentIndex++;
+        {
+            const char *cha=fex_name(fex);
+            QString name=QString::fromLatin1(cha);
+            zippedFileNames.append(name);
+            fex_next(fex);
+            currentIndex++;
+        }
     }
-    zippedFileNames.sort();
-    }
-
     return zippedFileNames;
 }
 
@@ -44,7 +42,7 @@ int ZipFileLoader::open()
     fex_open( &fex, path );
     fex_free_path( path );
     isOpend=true;
-   return 0;
+    return 0;
 }
 int ZipFileLoader::open(QString path)
 {
@@ -52,7 +50,7 @@ int ZipFileLoader::open(QString path)
     if(isOpend)
         close();
     open();
-   return 0;
+    return 0;
 }
 int ZipFileLoader::close()
 {

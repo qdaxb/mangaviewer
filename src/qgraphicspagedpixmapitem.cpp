@@ -11,7 +11,7 @@ QGraphicsPagedPixmapItem::QGraphicsPagedPixmapItem(QGraphicsItem *parent) :
         QGraphicsPixmapItem *newItem=new QGraphicsPixmapItem(this);
         splittedPages.append(newItem);
     }
-
+    this->setAcceptDrops(false);
 }
 
 QRectF QGraphicsPagedPixmapItem::boundingRect() const

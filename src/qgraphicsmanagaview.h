@@ -22,6 +22,10 @@ public:
     ~QGraphicsManagaView();
     void go(qreal step=0.2);
     void back(qreal step=0.2);
+    void nextPage();
+    void perviousPage();
+    void dropEvent(QDropEvent *event);
+    void dragEnterEvent(QDragEnterEvent *);
     void resizeEvent(QResizeEvent *event);
     void keyReleaseEvent(QKeyEvent *);
     int load(QString fileorpath);

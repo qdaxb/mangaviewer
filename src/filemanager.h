@@ -7,6 +7,7 @@ template<class T>
 class QStack;
 template<class T>
 class QList;
+#include <QStringList>
 class FileManager
 {
 public:
@@ -23,7 +24,7 @@ public:
     int get(QString fileName);
     QByteArray loadData(int index);
 private:
-    QList<QString>* fileListInCurrentFolder;
+    QStringList *fileListInCurrentFolder;
     QStack<FolderLoader*>* folderStack;
     bool isSuffixAcceptable(QString suffix);
     int loadFromFolder(QString fileorpath);
