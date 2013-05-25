@@ -24,6 +24,7 @@ public:
     QString getFilePath(){return filePath;}
     void updateImage();
     void detimeRects();
+    QSize getFullPageSize();
 private:
     bool needSplit();
     QString filePath;

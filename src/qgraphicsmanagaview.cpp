@@ -298,22 +298,30 @@ void QGraphicsManagaView::back(qreal step)
 void QGraphicsManagaView::nextPage()
 {
     // int pageCount=pageViewers.first()->getPageCount();
-    QGraphicsPagedPixmapItem *v=(QGraphicsPagedPixmapItem*)scene.itemAt(1,1);
+    QGraphicsPagedPixmapItem *v=(QGraphicsPagedPixmapItem*)scene.itemAt(10,10);
     v=(QGraphicsPagedPixmapItem*)v->parentItem();
     QGraphicsPagedPixmapItem *v1=pageViewers.first();
     QGraphicsPagedPixmapItem *v2=pageViewers.last();
-    int pageHeight=v->getPageSize().height();
-    int pageWidth=v->getPageSize().width();
+    int pageHeight=v->getFullPageSize().height();
     int ypos=v->y();
     int step=pageHeight-std::abs(ypos)%pageHeight;
-    if(step==0)
+    if(step<20)
         step=pageHeight;
     go(step);
 }
 
 void QGraphicsManagaView::perviousPage()
 {
-    back(pageViewers.first()->y()+pageViewers.first()->getPageSize().height());
+    QGraphicsPagedPixmapItem *v=(QGraphicsPagedPixmapItem*)scene.itemAt(10,10);
+    v=(QGraphicsPagedPixmapItem*)v->parentItem();
+    QGraphicsPagedPixmapItem *v1=pageViewers.first();
+    QGraphicsPagedPixmapItem *v2=pageViewers.last();
+    int pageHeight=v->getFullPageSize().height();
+    int ypos=v->y();
+    int step=std::abs(ypos)%pageHeight;
+    if(step<20)
+        step=pageHeight;
+    back(step);
 }
 
 void QGraphicsManagaView::dropEvent(QDropEvent *event)

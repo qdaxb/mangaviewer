@@ -47,6 +47,12 @@ QSize QGraphicsPagedPixmapItem::getFullSize()
     return QSize(pageSize.width()*this->scale(),pageSize.height()*pageCount*this->scale());
 }
 
+QSize QGraphicsPagedPixmapItem::getFullPageSize()
+{
+    if(image==NULL)
+        return QSize(0,0);
+    return QSize(pageSize.width()*this->scale(),pageSize.height()*this->scale());
+}
 QSize QGraphicsPagedPixmapItem::getBaseSize()
 {
     if(image==NULL)
