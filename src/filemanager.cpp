@@ -140,7 +140,13 @@ int FileManager::loadFromZipFile(QString path)
     currentFolderLoader->open();
     folderStack->push(currentFolderLoader);
     fileListInCurrentFolder->clear();
-    fileListInCurrentFolder->append(currentFolderLoader->fileList());
+    QStringList files=currentFolderLoader->fileList();
+    for(int i=0;i<files.size();i++)
+    {
+        if(isSuffixAcceptable( files.at(i).split('.').last()))
+        fileListInCurrentFolder->append(files.at(i));
+    }
+
     fileListInCurrentFolder->sort();
 }
 
@@ -149,34 +155,17 @@ int FileManager::loadFromFolder(QString path)
     currentFolderLoader=new LocalFolderLoader(path);
     this->folderStack->push(currentFolderLoader);
     this->fileListInCurrentFolder->clear();
-    this->fileListInCurrentFolder->append(currentFolderLoader->fileList());
-
+    QStringList files=currentFolderLoader->fileList();
+    for(int i=0;i<files.size();i++)
+    {
+        if(isSuffixAcceptable( files.at(i).split('.').last()))
+        fileListInCurrentFolder->append(files.at(i));
+    }
 
     return 0;
 }
 
-int FileManager::loadFromPreviousFolder()
-{
-    if(folderStack->size()<=1)
-        return -1;
-    folderStack->pop();
-    QString path=folderStack->top()->path();
-    QDir dir(path);
 
-    QFileInfoList fileInfoList=dir.entryInfoList(QDir::AllEntries|QDir::NoDotAndDotDot,QDir::DirsLast|QDir::Name|QDir::IgnoreCase);
-
-
-    this->fileListInCurrentFolder->clear();
-
-    for(int i=0;i<fileInfoList.size();i++)
-    {
-        this->fileListInCurrentFolder->append(fileInfoList.at(i).absoluteFilePath());
-
-    }
-
-    return 1;
-
-}
 
 QList<QString> &FileManager::list()
 {
@@ -200,7 +189,9 @@ bool FileManager::hasPrevious()
 
 QString FileManager::currentFolder()
 {
-    return folderStack->top()->path();
+    if(currentFolderLoader==NULL)
+        return "";
+    return currentFolderLoader->path();
 }
 QString FileManager::get(int index)
 {

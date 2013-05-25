@@ -3,7 +3,7 @@
  <class>QGraphicsManagaView</class>
  <widget class="QWidget" name="QGraphicsManagaView">
   <property name="windowModality">
-   <enum>Qt::NonModal</enum>
+   <enum>Qt::WindowModal</enum>
   </property>
   <property name="geometry">
    <rect>
@@ -18,6 +18,9 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="mouseTracking">
+   <bool>false</bool>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -34,6 +37,12 @@
    </property>
    <item row="0" column="0">
     <widget class="QGraphicsView" name="graphicsView">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="mouseTracking">
+      <bool>false</bool>
+     </property>
      <property name="acceptDrops">
       <bool>false</bool>
      </property>

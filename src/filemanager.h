@@ -23,12 +23,11 @@ public:
     QString get(int index);
     int get(QString fileName);
     QByteArray loadData(int index);
+    static bool isSuffixAcceptable(QString suffix);
 private:
     QStringList *fileListInCurrentFolder;
     QStack<FolderLoader*>* folderStack;
-    bool isSuffixAcceptable(QString suffix);
     int loadFromFolder(QString fileorpath);
-    int loadFromPreviousFolder();
     int loadFromZipFile(QString path);
     QString currentFile;
     FolderLoader *currentFolderLoader;

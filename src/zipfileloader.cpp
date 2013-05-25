@@ -39,10 +39,19 @@ int ZipFileLoader::open()
     if(isOpend)
         return 0;
     char* path=fex_wide_to_path( zipFileName.toStdWString().data() );
-    fex_open( &fex, path );
+    const char *rtn=fex_open( &fex, path );
+
     fex_free_path( path );
+    if(rtn==NULL)
+    {
     isOpend=true;
     return 0;
+    }
+    else
+    {
+        qDebug()<<rtn;
+        return -1;
+    }
 }
 int ZipFileLoader::open(QString path)
 {

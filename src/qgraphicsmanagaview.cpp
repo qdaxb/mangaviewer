@@ -14,6 +14,7 @@
 #include "qgraphicsmanagaview.h"
 #include "ui_qgraphicsmanagaview.h"
 #include "qgraphicspagedpixmapitem.h"
+#include "zipfileloader.h"
 QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageIndexs(),fileManager(),rate(1),
@@ -55,31 +56,60 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     }
     else
         init();
-
     if((width>0)&&(height>0))
         this->resize(width,height);
     updateTitle();
     this->setAcceptDrops(true);
+    dblClick=false;
 }
 
 
 int QGraphicsManagaView::load(QString fileorpath)
 {
     pageIndexs.clear();
-    fileManager.load(fileorpath);
+    int rtn=fileManager.load(fileorpath);
+    if(rtn!=0)
+    {
+        return -1;
+    }
     QFileInfo file(fileorpath);
     int index=fileManager.get(file.fileName());
     if(index!=-1)
-    init(index);
+        init(index);
     else
         init();
     return 0;
 }
 
-void QGraphicsManagaView::calucateItem()
+void QGraphicsManagaView::mouseMoveEvent(QMouseEvent *event)
+{
+    if ((event->buttons().testFlag(Qt::LeftButton))&&(event->buttons().testFlag(Qt::RightButton))) {
+
+        move(event->globalPos() - dragPosition);
+
+    }
+}
+
+void QGraphicsManagaView::mouseReleaseEvent(QMouseEvent *event)
+{
+    if(!dblClick)
+
+        CommandRegistry::get(modCMD(event)+"M"+(QString::number(event->button())))->execute(this);
+}
+void QGraphicsManagaView::mousePressEvent(QMouseEvent *event)
 {
 
+    if ((event->buttons().testFlag(Qt::LeftButton))&&(event->buttons().testFlag(Qt::RightButton))) {
+
+        dragPosition = event->globalPos() - frameGeometry().topLeft();
+        event->accept();
+        dblClick=true;
+
+    }
+    else
+        dblClick=false;
 }
+
 
 void QGraphicsManagaView::init(int index)
 {
@@ -105,7 +135,7 @@ void QGraphicsManagaView::init(int index)
         if(pageViewers.size()<=pageCount-index)
         {
             QGraphicsPagedPixmapItem *pageViewer=new QGraphicsPagedPixmapItem();
-
+            qDebug()<<"init page";
             //todo split mode
             pageViewer->setPageSplitMode(Manga::SPLIT_AUTO);
             scene.addItem(pageViewer);
@@ -182,9 +212,11 @@ void QGraphicsManagaView::go(qreal step)
     if(pageViewers.size()==0)
         return;
     bool needNextPage=false;
+    if(step==-1)
+        step=scene.height()*0.2;
     qreal distance=0;
-    distance=isLastPage?scene.height()-pageViewers.last()->getFullSize().height()-pageViewers.last()->y():-scene.height()*step;
-    distance=std::max(distance,-scene.height()*step);
+    distance=isLastPage?scene.height()-pageViewers.last()->getFullSize().height()-pageViewers.last()->y():-step;
+    distance=std::max(distance,-step);
     for(int i=0;i<pageViewers.size();i++)
     {
 
@@ -227,11 +259,11 @@ void QGraphicsManagaView::back(qreal step)
 {
     if(pageViewers.size()==0)
         return;
-    if(step==0)
-        step=0.2;
+    if(step==-1)
+        step=scene.height()*0.2;
     bool needNextPage=false;
-    qreal distance=isFirstPage?-pageViewers.first()->y():scene.height()*step;
-    distance=std::min(distance,scene.height()*step);
+    qreal distance=isFirstPage?-pageViewers.first()->y():step;
+    distance=std::min(distance,step);
     for(int i=0;i<pageViewers.size();i++)
     {
         pageViewers.at(i)->moveBy(0,distance);
@@ -265,10 +297,23 @@ void QGraphicsManagaView::back(qreal step)
 
 void QGraphicsManagaView::nextPage()
 {
+    // int pageCount=pageViewers.first()->getPageCount();
+    QGraphicsPagedPixmapItem *v=(QGraphicsPagedPixmapItem*)scene.itemAt(1,1);
+    v=(QGraphicsPagedPixmapItem*)v->parentItem();
+    QGraphicsPagedPixmapItem *v1=pageViewers.first();
+    QGraphicsPagedPixmapItem *v2=pageViewers.last();
+    int pageHeight=v->getPageSize().height();
+    int pageWidth=v->getPageSize().width();
+    int ypos=v->y();
+    int step=pageHeight-std::abs(ypos)%pageHeight;
+    if(step==0)
+        step=pageHeight;
+    go(step);
 }
 
 void QGraphicsManagaView::perviousPage()
 {
+    back(pageViewers.first()->y()+pageViewers.first()->getPageSize().height());
 }
 
 void QGraphicsManagaView::dropEvent(QDropEvent *event)
@@ -276,21 +321,34 @@ void QGraphicsManagaView::dropEvent(QDropEvent *event)
     if(event->mimeData()->hasUrls())
     {
         QUrl url=event->mimeData()->urls().first();
-        QString path=url.path();
-        path=path.right(path.length()-1);
+        QString path=url.toLocalFile();
         QFile file(path);
-       if(file.exists())
-       {
-           load(path);
-       }
+        if(file.exists())
+        {
+            load(path);
+        }
     }
 
 }
 
 void QGraphicsManagaView::dragEnterEvent(QDragEnterEvent *event)
-{if(event->mimeData()->hasUrls())
+{
+    if(event->mimeData()->hasUrls())
     {
-        event->acceptProposedAction();
+        QUrl url=event->mimeData()->urls().first();
+        if(url.isLocalFile())
+        {
+            QString path=url.toLocalFile();
+            QFileInfo file(path);
+            if(file.isDir())
+            {
+
+                event->acceptProposedAction();
+            }
+            QString suffix=url.toLocalFile().split('.').last();
+            if(FileManager::isSuffixAcceptable(suffix)||ZipFileLoader::isZipFile(suffix))
+                event->acceptProposedAction();
+        }
     }
 }
 
@@ -300,10 +358,7 @@ void QGraphicsManagaView::resizeEvent(QResizeEvent *event)
     adjustPages();
 
 }
-void QGraphicsManagaView::mousePressEvent(QMouseEvent *event)
-{
-    CommandRegistry::get(modCMD(event)+"M"+(QString::number(event->button())))->execute(this);
-}
+
 
 void QGraphicsManagaView::setScale(qreal rate)
 {
@@ -314,10 +369,12 @@ void QGraphicsManagaView::setScale(qreal rate)
         pageViewers.at(i)->setScale(rate==-1?fitrate:std::min(rate,fitrate));
     }
 }
+
 qreal QGraphicsManagaView::getScale( )
 {
-   return rate;
+    return rate;
 }
+
 QString QGraphicsManagaView::modCMD(QInputEvent *event)
 {
     if(event->modifiers().testFlag(Qt::NoModifier))
@@ -338,7 +395,7 @@ void QGraphicsManagaView::wheelEvent(QWheelEvent *event)
     if(event->delta()>0)
         CommandRegistry::get(modCMD(event)+"Wup")->execute(this);
     else
-         CommandRegistry::get(modCMD(event)+"Wdown")->execute(this);
+        CommandRegistry::get(modCMD(event)+"Wdown")->execute(this);
 }
 
 void QGraphicsManagaView::keyReleaseEvent(QKeyEvent *event)
@@ -346,6 +403,7 @@ void QGraphicsManagaView::keyReleaseEvent(QKeyEvent *event)
     qDebug()<<event->key();
     CommandRegistry::get(modCMD(event)+"K"+(QString::number(event->key())))->execute(this);
 }
+
 void QGraphicsManagaView::closeEvent(QCloseEvent *event)
 {
     if(pageViewers.size()==0)
