@@ -8,6 +8,8 @@
 #include "filemanager.h"
 #include <QSettings>
 #include <QPoint>
+#include "pagemanager.h"
+#include "qgraphicsgridscrollitem.h"
 class QGraphicsPagedPixmapItem;
 
 namespace Ui {
@@ -47,12 +49,18 @@ private:
     QQueue<QGraphicsPagedPixmapItem*> pageViewers;
     QQueue<int> pageIndexs;
     FileManager fileManager;
+    PageManager *pageManager;
+    QGraphicsGridScrollItem *scrollItem;
     bool isLastPage;
     bool isFirstPage;
     qreal rate;
     QSettings setting;
     QPoint dragPosition;
     bool dblClick;
+    int a;
+private slots:
+    void onLoadImage(int index);
+    void onUnloadImage(int index);
 };
 
 #endif // QGRAPHICSMANAGAVIEW_H

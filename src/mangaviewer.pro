@@ -14,11 +14,9 @@ TEMPLATE = app
 SOURCES += filemanager.cpp \
     main.cpp \
     msgpainter.cpp \
-    imageloader.cpp \
     viewercommand.cpp \
     commandregistry.cpp \
     keymapper.cpp \
-    qgraphicspagedpixmapitem.cpp \
     qgraphicsmanagaview.cpp \
     localfolderloader.cpp \
     zipfileloader.cpp \
@@ -70,16 +68,16 @@ SOURCES += filemanager.cpp \
     zlib/inflate.c \
     zlib/inffast.c \
     zlib/crc32.c \
-    zlib/adler32.c
+    zlib/adler32.c \
+    qgraphicsgridscrollitem.cpp \
+    pagemanager.cpp
 
 
 HEADERS  +=    filemanager.h \
     msgpainter.h \
-    imageloader.h \
     viewercommand.h \
     commandregistry.h \
     keymapper.h \
-    qgraphicspagedpixmapitem.h \
     qgraphicsmanagaview.h \
     common.h \
     folderloader.h \
@@ -135,7 +133,9 @@ HEADERS  +=    filemanager.h \
     zlib/inflate.h \
     zlib/inffixed.h \
     zlib/inffast.h \
-    zlib/crc32.h
+    zlib/crc32.h \
+    qgraphicsgridscrollitem.h \
+    pagemanager.h
 
 FORMS    +=  qgraphicsmanagaview.ui
 
