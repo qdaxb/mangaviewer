@@ -39,6 +39,8 @@ public:
     bool isReachRight();
     void setImage(int index, QImage *image);
     void updateView();
+    int currentRow(){return mShowingCells.top();}
+    bool emptyRow(int row){return rowHeight(row)<=0;}
 private:
     QGraphicsPixmapItem *getOrCreateItemAt(int row,int column);
     QGraphicsPixmapItem *getCachedItem();
@@ -68,7 +70,7 @@ private:
     QList<QGraphicsPixmapItem*> mCacheItems;
     QMap<int,QImage*> mImages;
     QImage *getImage(int index);
-    QMap<int,int> rowHeights;
+    QMap<int,qreal> rowHeights;
     int mTotalItemCount;
     LayoutMethods mLayoutMethod;
     bool needLayout;

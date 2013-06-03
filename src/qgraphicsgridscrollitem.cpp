@@ -6,6 +6,7 @@ QGraphicsGridScrollItem::QGraphicsGridScrollItem(QGraphicsItem *parent):QGraphic
     mShowingCells.setTop(0);
     mShowingCells.setHeight(0);
     prepareLayout();
+    mTotalItemCount=0;
 }
 
 QRectF QGraphicsGridScrollItem::boundingRect() const
@@ -42,7 +43,7 @@ void QGraphicsGridScrollItem::recoveryItems()
             {
                   item->setZValue(0);
                 item->setData(2,indexOf(i,j));
-                mShowingItems.removeAt(indexOf(i,j));
+                mShowingItems.removeOne(item);
                 if(!mCacheItems.contains(item))
                     mCacheItems.append(item);
             }
@@ -57,7 +58,7 @@ void QGraphicsGridScrollItem::recoveryItems()
             {
                  item->setZValue(0);
                 item->setData(2,indexOf(i,j));
-                mShowingItems.removeAt(indexOf(i,j));
+                mShowingItems.removeOne(item);
                 if(!mCacheItems.contains(item))
                 mCacheItems.append(item);
             }
@@ -120,7 +121,7 @@ void QGraphicsGridScrollItem::createShowingItems()
                 }
                 item->setPixmap(QPixmap::fromImage(*image));
                 item->setData(1,0);
-                itemWidthTo(item,columnWidth);
+                //itemWidthTo(item,columnWidth);
             }
         }
     }
@@ -130,7 +131,7 @@ void QGraphicsGridScrollItem::createShowingItems()
 QGraphicsPixmapItem *QGraphicsGridScrollItem::getCachedItem()
 {
     if(mCacheItems.empty())
-        return new QGraphicsPixmapItem(this,this->scene());
+        return new QGraphicsPixmapItem(this);
     else
     {
         QGraphicsPixmapItem *item=mCacheItems.first();
@@ -175,7 +176,7 @@ void QGraphicsGridScrollItem::calucatePosition()
     mScrollArea.setHeight(height);
     row--;
 
-    if(row==0&&mScrollArea.top()>0)
+    if(row<0&&mScrollArea.top()>0)
     {
         mScrollArea.setTop(0);
     }
@@ -248,7 +249,7 @@ void QGraphicsGridScrollItem::layout()
         {
             int column=mLayoutMethod.testFlag(RIGHT_TO_LEFT)?mColumnCount-j:j;
             int xpos=column*columnWidth;
-            QGraphicsItem *item=getOrCreateItemAt(i,j);
+            QGraphicsPixmapItem *item=getOrCreateItemAt(i,j);
 
             if(item==NULL)
             {
@@ -256,8 +257,9 @@ void QGraphicsGridScrollItem::layout()
                 continue;
             }
             item->setZValue(1);
+            //item->setOpacity(0.4);
             item->setPos(xpos,ypos);
-
+            itemWidthTo(item,mVisibleSize.width());
         }
         ypos+=rowHeight(i);
     }
@@ -272,6 +274,9 @@ void QGraphicsGridScrollItem::setImage( int index,QImage *image)
 void QGraphicsGridScrollItem::updateView()
 {
 
+    if(mTotalItemCount==0)
+        return;
+    calucatePosition();
     createShowingItems();
     layout();
     recoveryItems();
@@ -285,10 +290,13 @@ void QGraphicsGridScrollItem::paint(QPainter *painter, const QStyleOptionGraphic
 
 void QGraphicsGridScrollItem::scrollToCell(int row, int column, int offsetx, int offsety)
 {
+    row=std::max(row,0);
+    row=std::min(row,mTotalItemCount/mColumnCount);
     mShowingCells.setTop(row);
     mShowingCells.setHeight(0);
     prepareLayout();
-    scrollBy(offsetx,offsety);
+    mScrollArea.setLeft(offsetx);
+    mScrollArea.setTop(offsety);
     //recoveryItems();
 
 
@@ -299,7 +307,6 @@ void QGraphicsGridScrollItem::scrollBy(int offsetx, int offsety)
 
     mScrollArea.setLeft(offsetx);
     mScrollArea.setTop(mScrollArea.top()+offsety);
-    calucatePosition();
 }
 
 
@@ -310,26 +317,27 @@ QRect QGraphicsGridScrollItem::showingItemRect()
 
 int QGraphicsGridScrollItem::rowHeight(int row)
 {
+    qreal columnWidth=mVisibleSize.width()/mColumnCount;
 //    if(rowHeights.contains(row))
-//        return rowHeights[row];
+//        return rowHeights[row]*columnWidth;
 //    else
     {
-        int height=0;
+        qreal height=0;
 
-        qreal columnWidth=mVisibleSize.width()/mColumnCount;
+
         for(int i=0;i<mColumnCount;i++)
         {
             int column=mLayoutMethod.testFlag(RIGHT_TO_LEFT)?mColumnCount-i:i;
             QImage *image=getImage(indexOf(row,column));
-            if(image==NULL)
+            if(image==NULL||image->isNull())
             {
-                qDebug()<<row<<column;
-                Q_ASSERT(0);
+                height=0;
+                break;
             }
 
-            height=std::max((int)(columnWidth/image->width()*image->height()),height);
+            height=std::max(((qreal)image->height()/image->width()),(qreal)0);
         }
         rowHeights[row]=height;
-        return height;
+        return height*columnWidth;
     }
 }

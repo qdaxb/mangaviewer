@@ -15,12 +15,13 @@
 #include "ui_qgraphicsmanagaview.h"
 #include "qgraphicspagedpixmapitem.h"
 #include "zipfileloader.h"
+ #include <QMimeData>
+#include <QWidget>
 QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageIndexs(),fileManager(),rate(1),
     setting(QApplication::applicationDirPath ()+"/settings.ini",QSettings::IniFormat)
 {
-    a=0;
     ui->setupUi(this);
     ui->graphicsView->setScene(&scene);
     ui->graphicsView->setAcceptDrops(false);
@@ -30,8 +31,11 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     scrollItem=new QGraphicsGridScrollItem();
     scene.addItem(scrollItem);
 
+    setStyleSheet("background-color:transparent;");
+    setAttribute(Qt::WA_TranslucentBackground,true);
+
     connect(scrollItem,SIGNAL(onLoadImage(int)),this,SLOT(onLoadImage(int)));
-connect(scrollItem,SIGNAL(onUnloadImage(int)),this,SLOT(onUnloadImage(int)));
+    connect(scrollItem,SIGNAL(onUnloadImage(int)),this,SLOT(onUnloadImage(int)));
     QStringList list=setting.childKeys();
     for(int i=0;i<list.size();i++)
     {
@@ -46,7 +50,7 @@ connect(scrollItem,SIGNAL(onUnloadImage(int)),this,SLOT(onUnloadImage(int)));
     setting.endGroup();
     setting.beginGroup("lastread");
     QString folder=setting.value("lastfolder").toString();
-    QString file=setting.value("lastfile").toString();
+    int file=setting.value("lastfile").toInt();
     qreal width=setting.value("width").toReal();
     qreal height=setting.value("height").toReal();
     setting.endGroup();
@@ -56,32 +60,37 @@ connect(scrollItem,SIGNAL(onUnloadImage(int)),this,SLOT(onUnloadImage(int)));
     scrollItem->setVisibleArea(this->width(),this->height());
     if(folder!="")
     {
-        pageIndexs.clear();
-        pageManager->setPath(folder);
-        scrollItem->setTotalItemCount(pageManager->size());
+        int rtn=pageManager->setPath(folder);
+        if(rtn!=-1)
+        {
+            scrollItem->setTotalItemCount(pageManager->size());
+            init(file);
+        }
     }
-    if(file!="")
-    {
-        int index=fileManager.get(file);
-        if(index!=-1)
-            init(index);
-    }
-    else
-        init();
 
+    setting.beginGroup("general");
+    if(setting.value("noborder").toBool())
+        this->setWindowFlags(Qt::FramelessWindowHint);
+    setting.endGroup();
 
     updateTitle();
     this->setAcceptDrops(true);
     dblClick=false;
-
-
+    updateProgressBar();
+    ui->progressBar->setTextVisible(false);
+    ui->progressBar->setFixedHeight(3);
+    altKey=false;
 }
 
 
 int QGraphicsManagaView::load(QString fileorpath)
 {
-    pageManager->setPath(fileorpath);
+    int rtn=pageManager->setPath(fileorpath);
+    if(rtn==-1)
+        return -1;
+    scrollItem->setTotalItemCount(pageManager->size());
     scrollItem->scrollToCell(0,0,0,0);
+    scrollItem->updateView();
     return 0;
 }
 
@@ -134,28 +143,58 @@ QGraphicsManagaView::~QGraphicsManagaView()
 
 void QGraphicsManagaView::go(qreal step)
 {
-   scrollItem->scrollBy(0,-100);
-   scrollItem->updateView();
+    scrollItem->scrollBy(0,-100);
+    scrollItem->updateView();
+    updateProgressBar();
 }
 void QGraphicsManagaView::updateTitle()
 {
 
 }
 
+void QGraphicsManagaView::leaveEvent(QEvent *event)
+{
+    this->setWindowOpacity(0.3);
+
+    this->activateWindow();
+    isActiveWindow();
+}
+
+void QGraphicsManagaView::enterEvent(QEvent *event)
+{
+    this->setWindowOpacity(1);
+
+this->activateWindow();
+
+    //this->repaint(this->rect());
+}
+
+void QGraphicsManagaView::showMsg(QString &msg, int timeInSecond)
+{
+}
+
 void QGraphicsManagaView::back(qreal step)
 {
-   scrollItem->scrollBy(0,100);
-   scrollItem->updateView();
+    scrollItem->scrollBy(0,100);
+    scrollItem->updateView();
+    updateProgressBar();
 }
 
 void QGraphicsManagaView::nextPage()
 {
-
+    scrollItem->scrollToCell(scrollItem->currentRow()+1,0,0,0);
+    scrollItem->updateView();
+    updateProgressBar();
 }
 
 void QGraphicsManagaView::perviousPage()
 {
-
+    if(scrollItem->emptyRow(scrollItem->currentRow()-1))
+        scrollItem->scrollToCell(scrollItem->currentRow()-2,0,0,0);
+    else
+        scrollItem->scrollToCell(scrollItem->currentRow()-1,0,0,0);
+    scrollItem->updateView();
+    updateProgressBar();
 }
 
 void QGraphicsManagaView::dropEvent(QDropEvent *event)
@@ -196,9 +235,12 @@ void QGraphicsManagaView::dragEnterEvent(QDragEnterEvent *event)
 
 void QGraphicsManagaView::resizeEvent(QResizeEvent *event)
 {
-    scene.setSceneRect(QRect(QPoint(0,0),this->size()));
-    scrollItem->setVisibleArea(this->width(),this->height());
-scrollItem->updateView();
+    QSize size=ui->graphicsView->viewport()->size();
+    scene.setSceneRect(QRect(QPoint(0,0),size));
+    ui->progressBar->setUpdatesEnabled(true);
+    //scene.setSceneRect(QRect(QPoint(0,0),this->size()));
+    scrollItem->setVisibleArea(size.width(),size.height());
+    scrollItem->updateView();
 }
 
 
@@ -214,16 +256,23 @@ qreal QGraphicsManagaView::getScale( )
 
 QString QGraphicsManagaView::modCMD(QInputEvent *event)
 {
-    if(event->modifiers().testFlag(Qt::NoModifier))
-        return "";
+
     QString cmd="";
     if(event->modifiers().testFlag(Qt::ControlModifier))
         cmd+="C+";
     if(event->modifiers().testFlag(Qt::ShiftModifier))
         cmd+="S+";
-    if(event->modifiers().testFlag(Qt::AltModifier))
+    if(event->modifiers().testFlag(Qt::AltModifier)||altKey)
         cmd+="A+";
+
     return cmd;
+}
+
+void QGraphicsManagaView::updateProgressBar()
+{
+    ui->progressBar->setMaximum(fileManager.size()-1);
+    ui->progressBar->setValue(pageManager->fileIndexOfPage(scrollItem->currentRow()));
+    ui->progressBar->setFormat("%v/%m  "+fileManager.currentFolder());
 }
 
 void QGraphicsManagaView::onLoadImage(int index)
@@ -248,16 +297,26 @@ void QGraphicsManagaView::wheelEvent(QWheelEvent *event)
 void QGraphicsManagaView::keyReleaseEvent(QKeyEvent *event)
 {
     qDebug()<<event->key();
-    CommandRegistry::get(modCMD(event)+"K"+(QString::number(event->key())))->execute(this);
+    if(event->key()==Qt::Key_AltGr||event->key()==Qt::Key_Alt)
+        altKey=false;
+    else
+        CommandRegistry::get(modCMD(event)+"K"+(QString::number(event->key())))->execute(this);
+}
+
+void QGraphicsManagaView::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key()==Qt::Key_AltGr||event->key()==Qt::Key_Alt)
+        altKey=true;
 }
 
 void QGraphicsManagaView::closeEvent(QCloseEvent *event)
 {
-    if(pageViewers.size()==0)
-        return;
+    setting.beginGroup("general");
+    setting.setValue("noborder",this->windowFlags().testFlag(Qt::FramelessWindowHint));
+    setting.endGroup();
     setting.beginGroup("lastread");
     setting.setValue("lastfolder",fileManager.currentFolder());
-    setting.setValue("lastfile",pageViewers.first()->getFilePath());
+    setting.setValue("lastfile",scrollItem->currentRow());
     setting.setValue("width",scene.width());
     setting.setValue("height",scene.height());
     setting.endGroup();

@@ -93,11 +93,28 @@ REGISTER_COMMAND(ViewerToggleTitleCommand)
 void ViewerToggleTitleCommand::execute(QGraphicsManagaView *viewer)
 {
     QWidget *window=QApplication::activeWindow();
-    if(window->windowFlags()&Qt::FramelessWindowHint)
-        window->setWindowFlags(Qt::Widget);
+    qDebug()<<window->windowFlags();
+    if(window->windowFlags().testFlag(Qt::FramelessWindowHint))
+        window->setWindowFlags(window->windowFlags()&(~Qt::FramelessWindowHint));
     else
-        window->setWindowFlags(Qt::FramelessWindowHint);
+        window->setWindowFlags((window->windowFlags()|Qt::FramelessWindowHint)&(~(Qt::WindowTitleHint|0x1|0x1000|0x200|0x4000|0x8000|0x80000000)));
     window->show();
+}
+
+REGISTER_COMMAND(ViewerToggleOntopCommand)
+void ViewerToggleOntopCommand::execute(QGraphicsManagaView *viewer)
+{
+
+    QWidget *window=QApplication::activeWindow();
+   // window->hide();
+    qDebug()<<window->windowFlags();
+    if(window->windowFlags().testFlag(Qt::WindowStaysOnTopHint))
+        window->setWindowFlags(window->windowFlags()&~Qt::WindowStaysOnTopHint);
+    else
+        window->setWindowFlags(window->windowFlags()|Qt::WindowStaysOnTopHint);
+    qDebug()<<window->windowFlags();
+    window->show();
+    window->isActiveWindow();
 }
 
 REGISTER_COMMAND(ViewerHeightScaleUpCommand)

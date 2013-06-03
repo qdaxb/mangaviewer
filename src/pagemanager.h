@@ -38,6 +38,7 @@ public:
     int path();
     int setSplitMode(SplitMode mode);
     int setColumnCount(int count);
+    int fileIndexOfPage(int pageIndex);
 private:
     FileManager *mFileManager;
     SplitMode mSplitMode;
@@ -48,7 +49,6 @@ private:
     QMap<int,Arrange<int> > mPageArrangeOfFile;
     int pageIndexOfFile(int fileIndex);
     void loadFromFile(int fileIndex);
-    int fileIndexOfPage(int pageIndex);
     int calucatePageCount(int fileIndex);
 };
 

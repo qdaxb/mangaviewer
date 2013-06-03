@@ -105,7 +105,8 @@ int FileManager::load(QString fileorpath)
     //容器初始化
 
     QFileInfo fileInfo(fileorpath);
-
+    if(!fileInfo.exists())
+        return -1;
     if(fileInfo.isDir())
         loadFromFolder(fileorpath);
     else

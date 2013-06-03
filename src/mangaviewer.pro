@@ -63,14 +63,14 @@ SOURCES += filemanager.cpp \
     unrar/coder.cpp \
     unrar/arcread.cpp \
     unrar/archive.cpp \
-    zlib/zutil.c \
     zlib/inftrees.c \
     zlib/inflate.c \
     zlib/inffast.c \
     zlib/crc32.c \
     zlib/adler32.c \
     qgraphicsgridscrollitem.cpp \
-    pagemanager.cpp
+    pagemanager.cpp \
+    zlib/zutil.c
 
 
 HEADERS  +=    filemanager.h \
@@ -126,7 +126,6 @@ HEADERS  +=    filemanager.h \
     unrar/coder.hpp \
     unrar/array.hpp \
     unrar/archive.hpp \
-    zlib/zutil.h \
     zlib/zlib.h \
     zlib/zconf.h \
     zlib/inftrees.h \
@@ -135,10 +134,13 @@ HEADERS  +=    filemanager.h \
     zlib/inffast.h \
     zlib/crc32.h \
     qgraphicsgridscrollitem.h \
-    pagemanager.h
+    pagemanager.h \
+    zlib/zutil.h
 
 FORMS    +=  qgraphicsmanagaview.ui
 
 
 INCLUDEPATH+= ./include
+
+
 

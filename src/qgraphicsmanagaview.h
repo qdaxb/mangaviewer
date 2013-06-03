@@ -31,6 +31,7 @@ public:
     void dragEnterEvent(QDragEnterEvent *);
     void resizeEvent(QResizeEvent *event);
     void keyReleaseEvent(QKeyEvent *);
+    void keyPressEvent(QKeyEvent *event);
     int load(QString fileorpath);
     void mouseMoveEvent(QMouseEvent *);
     void mouseReleaseEvent(QMouseEvent *);
@@ -40,6 +41,9 @@ public:
     qreal getScale();
     void closeEvent(QCloseEvent *event);
     void updateTitle();
+    void leaveEvent(QEvent *event);
+    void enterEvent(QEvent *event);
+    void showMsg(QString &msg,int timeInSecond=4);
 private:
     void init(int index=0);
     void adjustPages();
@@ -57,7 +61,9 @@ private:
     QSettings setting;
     QPoint dragPosition;
     bool dblClick;
-    int a;
+    void updateProgressBar();
+    bool altKey;
+    QGraphicsSimpleTextItem *msgItem;
 private slots:
     void onLoadImage(int index);
     void onUnloadImage(int index);
