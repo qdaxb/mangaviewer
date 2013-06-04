@@ -41,6 +41,7 @@ public:
     void updateView();
     int currentRow(){return mShowingCells.top();}
     bool emptyRow(int row){return rowHeight(row)<=0;}
+    virtual void clear();
 private:
     QGraphicsPixmapItem *getOrCreateItemAt(int row,int column);
     QGraphicsPixmapItem *getCachedItem();

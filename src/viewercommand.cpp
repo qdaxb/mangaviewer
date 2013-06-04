@@ -8,12 +8,14 @@
 #include <algorithm>
 #include <QApplication>
 #include <QMessageBox>
+#include <QWidget>
 ViewerCommand::ViewerCommand()
 {
 }
 REGISTER_COMMAND(ViewerOpenFileCommand)
 void ViewerOpenFileCommand::execute(QGraphicsManagaView *viewer)
 {
+    QWidget *widget=QApplication::activeWindow();
     QString dir =QFileDialog::getOpenFileName(0, ("Open Directory"),
                                               "",
                                               QObject::tr("Supported types (*.png *.jpg *.bmp *.zip *.rar *.7z)")
@@ -27,6 +29,8 @@ void ViewerOpenFileCommand::execute(QGraphicsManagaView *viewer)
     {
         viewer->load(dir);
     }
+    widget->activateWindow();
+    widget->isActiveWindow();
 
 }
 

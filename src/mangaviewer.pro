@@ -70,7 +70,9 @@ SOURCES += filemanager.cpp \
     zlib/adler32.c \
     qgraphicsgridscrollitem.cpp \
     pagemanager.cpp \
-    zlib/zutil.c
+    zlib/zutil.c \
+    settings.cpp \
+    qgraphicssimplebackgroundtextitem.cpp
 
 
 HEADERS  +=    filemanager.h \
@@ -135,9 +137,12 @@ HEADERS  +=    filemanager.h \
     zlib/crc32.h \
     qgraphicsgridscrollitem.h \
     pagemanager.h \
-    zlib/zutil.h
+    zlib/zutil.h \
+    settings.h \
+    qgraphicssimplebackgroundtextitem.h
 
-FORMS    +=  qgraphicsmanagaview.ui
+FORMS    +=  qgraphicsmanagaview.ui \
+    settings.ui
 
 
 INCLUDEPATH+= ./include

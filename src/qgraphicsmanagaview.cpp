@@ -15,8 +15,10 @@
 #include "ui_qgraphicsmanagaview.h"
 #include "qgraphicspagedpixmapitem.h"
 #include "zipfileloader.h"
- #include <QMimeData>
+#include <QMimeData>
 #include <QWidget>
+#include <QTextCodec>
+#include "qgraphicssimplebackgroundtextitem.h"
 QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageIndexs(),fileManager(),rate(1),
@@ -25,14 +27,19 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     ui->setupUi(this);
     ui->graphicsView->setScene(&scene);
     ui->graphicsView->setAcceptDrops(false);
+    ui->graphicsView->setMouseTracking(true);
+    setMouseTracking(true);
+    this->setAcceptDrops(true);
+    setStyleSheet("background-color:transparent;");
+    setAttribute(Qt::WA_TranslucentBackground,true);
     scene.setBackgroundBrush(QBrush(Qt::black));
     setting.beginGroup("keys");
     pageManager=new PageManager(&fileManager);
     scrollItem=new QGraphicsGridScrollItem();
     scene.addItem(scrollItem);
-
-    setStyleSheet("background-color:transparent;");
-    setAttribute(Qt::WA_TranslucentBackground,true);
+    msgItem=new QGraphicsSimpleBackgroundTextItem();
+    scene.addItem(msgItem);
+    leftDblClick=false;
 
     connect(scrollItem,SIGNAL(onLoadImage(int)),this,SLOT(onLoadImage(int)));
     connect(scrollItem,SIGNAL(onUnloadImage(int)),this,SLOT(onUnloadImage(int)));
@@ -48,6 +55,12 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
         }
     }
     setting.endGroup();
+
+
+    setting.beginGroup("general");
+    if(setting.value("noborder").toBool())
+        this->setWindowFlags(Qt::FramelessWindowHint);
+    setting.endGroup();
     setting.beginGroup("lastread");
     QString folder=setting.value("lastfolder").toString();
     int file=setting.value("lastfile").toInt();
@@ -60,22 +73,19 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     scrollItem->setVisibleArea(this->width(),this->height());
     if(folder!="")
     {
-        int rtn=pageManager->setPath(folder);
+
+        int rtn=load(folder);
         if(rtn!=-1)
         {
             scrollItem->setTotalItemCount(pageManager->size());
             init(file);
         }
     }
-
-    setting.beginGroup("general");
-    if(setting.value("noborder").toBool())
-        this->setWindowFlags(Qt::FramelessWindowHint);
-    setting.endGroup();
-
-    updateTitle();
-    this->setAcceptDrops(true);
-    dblClick=false;
+    else
+    {
+        showMsg("Axb's MangaViewer - double click to load file.",-1);
+    }
+    leftAndRightButton=false;
     updateProgressBar();
     ui->progressBar->setTextVisible(false);
     ui->progressBar->setFixedHeight(3);
@@ -85,18 +95,57 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
 
 int QGraphicsManagaView::load(QString fileorpath)
 {
-    int rtn=pageManager->setPath(fileorpath);
-    if(rtn==-1)
+    if(fileorpath=="")
         return -1;
-    scrollItem->setTotalItemCount(pageManager->size());
+    scrollItem->clear();
+    int rtn=pageManager->setPath(fileorpath);
+
+    if(rtn==-1)
+    {
+        showMsg("Can not load path: "+fileorpath,5);
+        return -1;
+    }
+    int size=pageManager->size();
+    if(size==0)
+    {
+        showMsg("Folder has no images: "+fileorpath,5);
+        return -1;
+    }
+    scrollItem->setTotalItemCount(size);
     scrollItem->scrollToCell(0,0,0,0);
     scrollItem->updateView();
+    showMsg("Loaded Folder:"+fileManager.currentFolder());
+    updateProgressBar();
     return 0;
 }
 
 void QGraphicsManagaView::mouseMoveEvent(QMouseEvent *event)
 {
-    if ((event->buttons().testFlag(Qt::LeftButton))&&(event->buttons().testFlag(Qt::RightButton))) {
+    if(leftAndRightButton)
+    {
+        int offsetX=std::abs(lastPos.x()-event->x());
+
+        if(offsetX>50)
+        {
+            if(event->modifiers().testFlag(Qt::ControlModifier))
+
+                scrollItem->scrollBy(0,offsetX);
+            else
+                scrollItem->scrollBy(0,-offsetX);
+            scrollItem->updateView();
+            lastPos=event->pos();
+            updateProgressBar();
+
+        }
+        else if(offsetX<0)
+        {
+            lastPos=event->pos();
+
+        }
+
+    }
+
+    if ((!event->buttons().testFlag(Qt::LeftButton))&&(event->buttons().testFlag(Qt::RightButton))) {
 
         move(event->globalPos() - dragPosition);
 
@@ -105,22 +154,43 @@ void QGraphicsManagaView::mouseMoveEvent(QMouseEvent *event)
 
 void QGraphicsManagaView::mouseReleaseEvent(QMouseEvent *event)
 {
-    if(!dblClick)
+    if(!leftAndRightButton)
 
         CommandRegistry::get(modCMD(event)+"M"+(QString::number(event->button())))->execute(this);
 }
 void QGraphicsManagaView::mousePressEvent(QMouseEvent *event)
 {
-
-    if ((event->buttons().testFlag(Qt::LeftButton))&&(event->buttons().testFlag(Qt::RightButton))) {
-
+    if ((!event->buttons().testFlag(Qt::LeftButton))&&(event->buttons().testFlag(Qt::RightButton))) {
         dragPosition = event->globalPos() - frameGeometry().topLeft();
+    }
+    else if((event->buttons().testFlag(Qt::LeftButton))&&(!event->buttons().testFlag(Qt::RightButton))) {
+        if(leftDblClick)
+        {
+            CommandRegistry::get(modCMD(event)+"MD1")->execute(this);
+            leftDblClick=false;
+        }
+        else
+        {
+            mouseDblClickTimer=startTimer(500);
+            leftDblClick=true;
+
+        }
+    }
+    else if ((event->buttons().testFlag(Qt::LeftButton))&&(event->buttons().testFlag(Qt::RightButton))) {
+
+
         event->accept();
-        dblClick=true;
+        leftAndRightButton=true;
+        showMsg("Start mouse move mode.");
+        ui->progressBar->setStyleSheet("QProgressBar::chunk {background-color: #05B8CC;}");
+        lastPos=event->pos();
 
     }
     else
-        dblClick=false;
+    {
+
+    }
+
 }
 
 
@@ -164,13 +234,39 @@ void QGraphicsManagaView::enterEvent(QEvent *event)
 {
     this->setWindowOpacity(1);
 
-this->activateWindow();
+    this->activateWindow();
 
     //this->repaint(this->rect());
 }
 
-void QGraphicsManagaView::showMsg(QString &msg, int timeInSecond)
+void QGraphicsManagaView::showMsg(QString msg, int timeInSecond)
 {
+    msgItem->setText(msg);
+    msgItem->setVisible(true);
+    if(timeInSecond>0)
+    msgtimer=this->startTimer(timeInSecond*1000);
+}
+
+void QGraphicsManagaView::timerEvent(QTimerEvent *event)
+{
+    int timerid=event->timerId();
+    if(timerid==msgtimer)
+    {
+        msgItem->setVisible(false);
+        killTimer(timerid);
+    }
+    else if(timerid==mouseDblClickTimer)
+    {
+        leftDblClick=false;
+        if(leftAndRightButton)
+        {
+        ui->progressBar->setStyleSheet("QProgressBar::chunk {background-color: grey;}");
+
+        leftAndRightButton=false;
+        showMsg("Stop mouse move mode.");
+        }
+        killTimer(timerid);
+    }
 }
 
 void QGraphicsManagaView::back(qreal step)
@@ -237,7 +333,6 @@ void QGraphicsManagaView::resizeEvent(QResizeEvent *event)
 {
     QSize size=ui->graphicsView->viewport()->size();
     scene.setSceneRect(QRect(QPoint(0,0),size));
-    ui->progressBar->setUpdatesEnabled(true);
     //scene.setSceneRect(QRect(QPoint(0,0),this->size()));
     scrollItem->setVisibleArea(size.width(),size.height());
     scrollItem->updateView();
@@ -270,8 +365,10 @@ QString QGraphicsManagaView::modCMD(QInputEvent *event)
 
 void QGraphicsManagaView::updateProgressBar()
 {
-    ui->progressBar->setMaximum(fileManager.size()-1);
-    ui->progressBar->setValue(pageManager->fileIndexOfPage(scrollItem->currentRow()));
+
+    ui->progressBar->setMaximum(fileManager.size());
+
+    ui->progressBar->setValue(pageManager->fileIndexOfPage(scrollItem->currentRow())+1);
     ui->progressBar->setFormat("%v/%m  "+fileManager.currentFolder());
 }
 
@@ -296,7 +393,7 @@ void QGraphicsManagaView::wheelEvent(QWheelEvent *event)
 
 void QGraphicsManagaView::keyReleaseEvent(QKeyEvent *event)
 {
-    qDebug()<<event->key();
+    event->accept();
     if(event->key()==Qt::Key_AltGr||event->key()==Qt::Key_Alt)
         altKey=false;
     else

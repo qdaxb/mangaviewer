@@ -283,6 +283,22 @@ void QGraphicsGridScrollItem::updateView()
     mLoadedCells=mShowingCells;
 }
 
+void QGraphicsGridScrollItem::clear()
+{
+
+    QList<QGraphicsItem *> items=this->childItems();
+    for(int i=0;i<items.size();i++)
+    {
+        delete items.at(i);
+    }
+
+    mImages.clear();
+    rowHeights.clear();
+    mShowingItems.clear();
+    mCacheItems.clear();
+    mTotalItemCount=0;
+}
+
 
 void QGraphicsGridScrollItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
@@ -298,8 +314,6 @@ void QGraphicsGridScrollItem::scrollToCell(int row, int column, int offsetx, int
     mScrollArea.setLeft(offsetx);
     mScrollArea.setTop(offsety);
     //recoveryItems();
-
-
 }
 
 void QGraphicsGridScrollItem::scrollBy(int offsetx, int offsety)

@@ -43,7 +43,8 @@ public:
     void updateTitle();
     void leaveEvent(QEvent *event);
     void enterEvent(QEvent *event);
-    void showMsg(QString &msg,int timeInSecond=4);
+    void showMsg(QString msg, int timeInSecond=3);
+    void timerEvent(QTimerEvent *event);
 private:
     void init(int index=0);
     void adjustPages();
@@ -60,10 +61,14 @@ private:
     qreal rate;
     QSettings setting;
     QPoint dragPosition;
-    bool dblClick;
+    bool leftAndRightButton;
+    bool leftDblClick;
     void updateProgressBar();
     bool altKey;
     QGraphicsSimpleTextItem *msgItem;
+    QPoint lastPos;
+    int msgtimer;
+    int mouseDblClickTimer;
 private slots:
     void onLoadImage(int index);
     void onUnloadImage(int index);
