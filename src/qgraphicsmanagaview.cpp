@@ -60,6 +60,8 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     setting.beginGroup("general");
     if(setting.value("noborder").toBool())
         this->setWindowFlags(Qt::FramelessWindowHint);
+    backgroundOpacity=std::max(0.1,setting.value("backgroundOpacity").toReal());
+    foregroundOpacity=std::max(0.1,setting.value("foregroundOpacity").toReal());
     setting.endGroup();
     setting.beginGroup("lastread");
     QString folder=setting.value("lastfolder").toString();
@@ -224,7 +226,7 @@ void QGraphicsManagaView::updateTitle()
 
 void QGraphicsManagaView::leaveEvent(QEvent *event)
 {
-    this->setWindowOpacity(0.3);
+    this->setWindowOpacity(backgroundOpacity);
 
     this->activateWindow();
     isActiveWindow();
@@ -232,7 +234,7 @@ void QGraphicsManagaView::leaveEvent(QEvent *event)
 
 void QGraphicsManagaView::enterEvent(QEvent *event)
 {
-    this->setWindowOpacity(1);
+    this->setWindowOpacity(foregroundOpacity);
 
     this->activateWindow();
 
@@ -410,6 +412,8 @@ void QGraphicsManagaView::closeEvent(QCloseEvent *event)
 {
     setting.beginGroup("general");
     setting.setValue("noborder",this->windowFlags().testFlag(Qt::FramelessWindowHint));
+    setting.setValue("backgroundOpacity",backgroundOpacity);
+    setting.setValue("foregroundOpacity",foregroundOpacity);
     setting.endGroup();
     setting.beginGroup("lastread");
     setting.setValue("lastfolder",fileManager.currentFolder());

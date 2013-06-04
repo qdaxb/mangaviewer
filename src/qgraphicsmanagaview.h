@@ -69,6 +69,8 @@ private:
     QPoint lastPos;
     int msgtimer;
     int mouseDblClickTimer;
+    qreal backgroundOpacity;
+    qreal foregroundOpacity;
 private slots:
     void onLoadImage(int index);
     void onUnloadImage(int index);
