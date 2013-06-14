@@ -25,87 +25,97 @@
   <property name="windowTitle">
    <string>Axb's MangaViewer</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/images/icon/images/icon.jpg</normaloff>:/images/icon/images/icon.jpg</iconset>
+  </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <property name="margin">
+  <widget class="QGraphicsView" name="graphicsView">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>256</width>
+     <height>192</height>
+    </rect>
+   </property>
+   <property name="mouseTracking">
+    <bool>false</bool>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::StrongFocus</enum>
+   </property>
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <property name="lineWidth">
     <number>0</number>
    </property>
-   <property name="spacing">
-    <number>0</number>
+   <property name="verticalScrollBarPolicy">
+    <enum>Qt::ScrollBarAsNeeded</enum>
    </property>
-   <item row="0" column="0">
-    <widget class="QGraphicsView" name="graphicsView">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="mouseTracking">
-      <bool>false</bool>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::StrongFocus</enum>
-     </property>
-     <property name="acceptDrops">
-      <bool>false</bool>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <property name="lineWidth">
-      <number>0</number>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAsNeeded</enum>
-     </property>
-     <property name="sceneRect">
-      <rectf>
-       <x>0.000000000000000</x>
-       <y>0.000000000000000</y>
-       <width>0.000000000000000</width>
-       <height>0.000000000000000</height>
-      </rectf>
-     </property>
-     <property name="resizeAnchor">
-      <enum>QGraphicsView::AnchorViewCenter</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QProgressBar" name="progressBar">
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QProgressBar {
+   <property name="sceneRect">
+    <rectf>
+     <x>0.000000000000000</x>
+     <y>0.000000000000000</y>
+     <width>0.000000000000000</width>
+     <height>0.000000000000000</height>
+    </rectf>
+   </property>
+   <property name="resizeAnchor">
+    <enum>QGraphicsView::AnchorViewCenter</enum>
+   </property>
+  </widget>
+  <widget class="QProgressBar" name="progressBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>577</y>
+     <width>95</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QProgressBar {
      border-radius: 5px;
 	background-color:#FFFFFF;
 }
 QProgressBar::chunk {
      background-color: grey;
 }</string>
-     </property>
-     <property name="value">
-      <number>0</number>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="textVisible">
-      <bool>true</bool>
-     </property>
-     <property name="invertedAppearance">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-  </layout>
+   </property>
+   <property name="value">
+    <number>0</number>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <property name="textVisible">
+    <bool>true</bool>
+   </property>
+   <property name="invertedAppearance">
+    <bool>false</bool>
+   </property>
+  </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

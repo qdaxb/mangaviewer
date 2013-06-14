@@ -25,7 +25,7 @@ void PageManager::releaseImage(int index)
     if(mImages.contains(index))
     {
         delete mImages[index];
-        qDebug()<<mImages.remove(index);
+        mImages.remove(index);
     }
 
 }
@@ -40,6 +40,11 @@ int PageManager::size()
 
 int PageManager::setPath(QString path)
 {
+
+    if(mImages.size()>0)
+    {
+        clear();
+    }
     int rtn=mFileManager->load(path);
     if(rtn==-1)
     {
@@ -100,6 +105,16 @@ int PageManager::fileIndexOfPage(int pageIndex)
         return pageIndex;
     else
         return pageIndex/mColumnCount;
+}
+
+void PageManager::clear()
+{
+    QList<QImage*> images=mImages.values();
+    for(int i=0;i<images.size();i++)
+    {
+        delete images.at(i);
+    }
+    mImages.clear();
 }
 
 

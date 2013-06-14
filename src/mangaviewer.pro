@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui xml
 QT += widgets
 
 TARGET =mangaviewer 
@@ -71,8 +71,9 @@ SOURCES += filemanager.cpp \
     qgraphicsgridscrollitem.cpp \
     pagemanager.cpp \
     zlib/zutil.c \
-    settings.cpp \
-    qgraphicssimplebackgroundtextitem.cpp
+    qgraphicssimplebackgroundtextitem.cpp \
+    settingsdialog.cpp \
+    shortcutmanager.cpp
 
 
 HEADERS  +=    filemanager.h \
@@ -138,14 +139,18 @@ HEADERS  +=    filemanager.h \
     qgraphicsgridscrollitem.h \
     pagemanager.h \
     zlib/zutil.h \
-    settings.h \
-    qgraphicssimplebackgroundtextitem.h
+    qgraphicssimplebackgroundtextitem.h \
+    settingsdialog.h \
+    shortcutmanager.h
 
 FORMS    +=  qgraphicsmanagaview.ui \
-    settings.ui
+    settingsdialog.ui
 
 
 INCLUDEPATH+= ./include
 
+include(qxtglobalshortcut/qxtglobalshortcut.pri)
 
+RESOURCES += \
+    resources.qrc
 

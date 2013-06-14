@@ -5,6 +5,7 @@ class KeyMapper
 {
 public:
     KeyMapper();
+
 };
 
 #endif // KEYMAPPER_H

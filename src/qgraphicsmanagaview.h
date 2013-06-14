@@ -11,6 +11,7 @@
 #include "pagemanager.h"
 #include "qgraphicsgridscrollitem.h"
 class QGraphicsPagedPixmapItem;
+class ShortcutManager;
 
 namespace Ui {
 class QGraphicsManagaView;
@@ -23,6 +24,7 @@ class QGraphicsManagaView : public QWidget
 public:
     explicit QGraphicsManagaView(QWidget *parent = 0);
     ~QGraphicsManagaView();
+    QString currentPath();
     void go(qreal step=-1);
     void back(qreal step=-1);
     void nextPage();
@@ -45,8 +47,10 @@ public:
     void enterEvent(QEvent *event);
     void showMsg(QString msg, int timeInSecond=3);
     void timerEvent(QTimerEvent *event);
+    void toggleProgressBar();
 private:
     void init(int index=0);
+    void updateLayout();
     void adjustPages();
     QString modCMD(QInputEvent *event);
     Ui::QGraphicsManagaView *ui;
@@ -71,6 +75,11 @@ private:
     int mouseDblClickTimer;
     qreal backgroundOpacity;
     qreal foregroundOpacity;
+    QKeySequence getKeySequence(QKeyEvent *event);
+    ShortcutManager *shortcutManager;
+    int progressBarHeight;
+    int moveDelta;
+    qreal moveRate;
 private slots:
     void onLoadImage(int index);
     void onUnloadImage(int index);

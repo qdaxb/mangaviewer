@@ -9,7 +9,6 @@
 #include <QUrl>
 #include <QFileInfo>
 #include "filemanager.h"
-#include "commandregistry.h"
 #include "viewercommand.h"
 #include "qgraphicsmanagaview.h"
 #include "ui_qgraphicsmanagaview.h"
@@ -19,6 +18,7 @@
 #include <QWidget>
 #include <QTextCodec>
 #include "qgraphicssimplebackgroundtextitem.h"
+#include "shortcutmanager.h"
 QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageIndexs(),fileManager(),rate(1),
@@ -32,8 +32,13 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     this->setAcceptDrops(true);
     setStyleSheet("background-color:transparent;");
     setAttribute(Qt::WA_TranslucentBackground,true);
+    progressBarHeight=3;
+
+    shortcutManager=ShortcutManager::getInstance();
+    shortcutManager->setViewer(this);
+    shortcutManager->loadFromXmlFile(QApplication::applicationDirPath ()+"/shortcuts.xml");
+
     scene.setBackgroundBrush(QBrush(Qt::black));
-    setting.beginGroup("keys");
     pageManager=new PageManager(&fileManager);
     scrollItem=new QGraphicsGridScrollItem();
     scene.addItem(scrollItem);
@@ -43,18 +48,7 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
 
     connect(scrollItem,SIGNAL(onLoadImage(int)),this,SLOT(onLoadImage(int)));
     connect(scrollItem,SIGNAL(onUnloadImage(int)),this,SLOT(onUnloadImage(int)));
-    QStringList list=setting.childKeys();
-    for(int i=0;i<list.size();i++)
-    {
-        QString key=list.at(i);
-        QString value=setting.value(key).toString();
-        QStringList valueList=value.split("|");
-        for(int j=0;j<valueList.size();j++)
-        {
-            CommandRegistry::map(valueList.at(j),"Viewer"+key+"Command");
-        }
-    }
-    setting.endGroup();
+
 
 
     setting.beginGroup("general");
@@ -62,6 +56,8 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
         this->setWindowFlags(Qt::FramelessWindowHint);
     backgroundOpacity=std::max(0.1,setting.value("backgroundOpacity").toReal());
     foregroundOpacity=std::max(0.1,setting.value("foregroundOpacity").toReal());
+    moveDelta=setting.value("moveDelta").toReal();
+    moveRate=setting.value("moveRate").toReal();
     setting.endGroup();
     setting.beginGroup("lastread");
     QString folder=setting.value("lastfolder").toString();
@@ -89,8 +85,7 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     }
     leftAndRightButton=false;
     updateProgressBar();
-    ui->progressBar->setTextVisible(false);
-    ui->progressBar->setFixedHeight(3);
+
     altKey=false;
 }
 
@@ -126,14 +121,14 @@ void QGraphicsManagaView::mouseMoveEvent(QMouseEvent *event)
     if(leftAndRightButton)
     {
         int offsetX=std::abs(lastPos.x()-event->x());
-
-        if(offsetX>50)
+        offsetX+=std::abs(lastPos.y()-event->y());
+        if(offsetX>moveDelta)
         {
             if(event->modifiers().testFlag(Qt::ControlModifier))
 
-                scrollItem->scrollBy(0,offsetX);
+                scrollItem->scrollBy(0,offsetX*moveRate);
             else
-                scrollItem->scrollBy(0,-offsetX);
+                scrollItem->scrollBy(0,-offsetX*moveRate);
             scrollItem->updateView();
             lastPos=event->pos();
             updateProgressBar();
@@ -157,8 +152,10 @@ void QGraphicsManagaView::mouseMoveEvent(QMouseEvent *event)
 void QGraphicsManagaView::mouseReleaseEvent(QMouseEvent *event)
 {
     if(!leftAndRightButton)
-
-        CommandRegistry::get(modCMD(event)+"M"+(QString::number(event->button())))->execute(this);
+    {
+        QString command=modCMD(event)+"M"+(QString::number(event->button()));
+        shortcutManager->getCommand(command.toUpper())->execute(this);
+    }
 }
 void QGraphicsManagaView::mousePressEvent(QMouseEvent *event)
 {
@@ -168,7 +165,8 @@ void QGraphicsManagaView::mousePressEvent(QMouseEvent *event)
     else if((event->buttons().testFlag(Qt::LeftButton))&&(!event->buttons().testFlag(Qt::RightButton))) {
         if(leftDblClick)
         {
-            CommandRegistry::get(modCMD(event)+"MD1")->execute(this);
+            QString command=modCMD(event)+"MD1";
+            shortcutManager->getCommand(command.toUpper())->execute(this);
             leftDblClick=false;
         }
         else
@@ -202,6 +200,7 @@ void QGraphicsManagaView::init(int index)
     scrollItem->updateView();
 }
 
+
 void QGraphicsManagaView::adjustPages()
 {
 
@@ -211,6 +210,11 @@ void QGraphicsManagaView::adjustPages()
 QGraphicsManagaView::~QGraphicsManagaView()
 {
     delete ui;
+}
+
+QString QGraphicsManagaView::currentPath()
+{
+    return fileManager.currentFolder();
 }
 
 void QGraphicsManagaView::go(qreal step)
@@ -246,7 +250,7 @@ void QGraphicsManagaView::showMsg(QString msg, int timeInSecond)
     msgItem->setText(msg);
     msgItem->setVisible(true);
     if(timeInSecond>0)
-    msgtimer=this->startTimer(timeInSecond*1000);
+        msgtimer=this->startTimer(timeInSecond*1000);
 }
 
 void QGraphicsManagaView::timerEvent(QTimerEvent *event)
@@ -262,13 +266,20 @@ void QGraphicsManagaView::timerEvent(QTimerEvent *event)
         leftDblClick=false;
         if(leftAndRightButton)
         {
-        ui->progressBar->setStyleSheet("QProgressBar::chunk {background-color: grey;}");
+            ui->progressBar->setStyleSheet("QProgressBar::chunk {background-color: grey;}");
 
-        leftAndRightButton=false;
-        showMsg("Stop mouse move mode.");
+            leftAndRightButton=false;
+            showMsg("Stop mouse move mode.");
         }
         killTimer(timerid);
     }
+}
+
+void QGraphicsManagaView::toggleProgressBar()
+{
+    progressBarHeight=progressBarHeight==3?18:3;
+    ui->progressBar->setTextVisible(progressBarHeight==18);
+    updateLayout();
 }
 
 void QGraphicsManagaView::back(qreal step)
@@ -333,13 +344,23 @@ void QGraphicsManagaView::dragEnterEvent(QDragEnterEvent *event)
 
 void QGraphicsManagaView::resizeEvent(QResizeEvent *event)
 {
+   updateLayout();
+}
+
+void QGraphicsManagaView::updateLayout()
+{
+    QSize newSize=size();
+    ui->graphicsView->resize(newSize.width(),newSize.height()-progressBarHeight);
+    ui->progressBar->move(0,newSize.height()-(progressBarHeight));
+    ui->progressBar->setFixedHeight(progressBarHeight);
+    ui->progressBar->setFixedWidth(newSize.width());
+    ui->progressBar->setTextVisible(progressBarHeight==18);
     QSize size=ui->graphicsView->viewport()->size();
     scene.setSceneRect(QRect(QPoint(0,0),size));
     //scene.setSceneRect(QRect(QPoint(0,0),this->size()));
     scrollItem->setVisibleArea(size.width(),size.height());
     scrollItem->updateView();
 }
-
 
 void QGraphicsManagaView::setScale(qreal rate)
 {
@@ -356,11 +377,11 @@ QString QGraphicsManagaView::modCMD(QInputEvent *event)
 
     QString cmd="";
     if(event->modifiers().testFlag(Qt::ControlModifier))
-        cmd+="C+";
+        cmd+="CTRL+";
     if(event->modifiers().testFlag(Qt::ShiftModifier))
-        cmd+="S+";
+        cmd+="SHIFT+";
     if(event->modifiers().testFlag(Qt::AltModifier)||altKey)
-        cmd+="A+";
+        cmd+="ALT+";
 
     return cmd;
 }
@@ -374,9 +395,43 @@ void QGraphicsManagaView::updateProgressBar()
     ui->progressBar->setFormat("%v/%m  "+fileManager.currentFolder());
 }
 
+QKeySequence QGraphicsManagaView::getKeySequence(QKeyEvent *event)
+{
+
+    int keyInt = event->key();
+    Qt::Key key = static_cast<Qt::Key>(keyInt);
+    if(key == Qt::Key_unknown){
+
+        return QKeySequence();
+    }
+    // the user have clicked just and only the special keys Ctrl, Shift, Alt, Meta.
+    if(key == Qt::Key_Control ||
+            key == Qt::Key_Shift ||
+            key == Qt::Key_Alt ||
+            key == Qt::Key_Meta)
+    {
+        return QKeySequence();
+    }
+
+    // check for a combination of user clicks
+    Qt::KeyboardModifiers modifiers = event->modifiers();
+
+    if(modifiers & Qt::ShiftModifier)
+        keyInt += Qt::SHIFT;
+    if(modifiers & Qt::ControlModifier)
+        keyInt += Qt::CTRL;
+    if(modifiers & Qt::AltModifier)
+        keyInt += Qt::ALT;
+    if(modifiers & Qt::MetaModifier)
+        keyInt += Qt::META;
+    qDebug()<<QKeySequence(keyInt).toString(QKeySequence::NativeText);
+    return QKeySequence(keyInt).toString(QKeySequence::NativeText);
+}
+
 void QGraphicsManagaView::onLoadImage(int index)
 {
     scrollItem->setImage(index,pageManager->getImage(index));
+
 }
 
 void QGraphicsManagaView::onUnloadImage(int index)
@@ -388,18 +443,19 @@ void QGraphicsManagaView::wheelEvent(QWheelEvent *event)
 {
     QString base="";
     if(event->delta()>0)
-        CommandRegistry::get(modCMD(event)+"Wup")->execute(this);
+        shortcutManager->getCommand(modCMD(event)+"WUP")->execute(this);
     else
-        CommandRegistry::get(modCMD(event)+"Wdown")->execute(this);
+        shortcutManager->getCommand(modCMD(event)+"WDOWN")->execute(this);
 }
 
 void QGraphicsManagaView::keyReleaseEvent(QKeyEvent *event)
 {
+    qDebug()<<getKeySequence(event).toString();
     event->accept();
     if(event->key()==Qt::Key_AltGr||event->key()==Qt::Key_Alt)
         altKey=false;
     else
-        CommandRegistry::get(modCMD(event)+"K"+(QString::number(event->key())))->execute(this);
+        shortcutManager->getCommand(getKeySequence(event).toString().toUpper())->execute(this);
 }
 
 void QGraphicsManagaView::keyPressEvent(QKeyEvent *event)

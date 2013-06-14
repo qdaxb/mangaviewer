@@ -7,7 +7,7 @@
 #include "filemanager.h"
 #include <QTextCodec>
 #include "qgraphicsmanagaview.h"
-
+#include "settingsdialog.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -15,7 +15,8 @@ int main(int argc, char *argv[])
     QGraphicsManagaView w;
 
     w.show();
-
+//    SettingsDialog dialog;
+//    dialog.show();
     return a.exec();
 }
 

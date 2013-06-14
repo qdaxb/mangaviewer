@@ -9,15 +9,15 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QWidget>
+#include <QIcon>
 ViewerCommand::ViewerCommand()
 {
 }
 REGISTER_COMMAND(ViewerOpenFileCommand)
 void ViewerOpenFileCommand::execute(QGraphicsManagaView *viewer)
 {
-    QWidget *widget=QApplication::activeWindow();
     QString dir =QFileDialog::getOpenFileName(0, ("Open Directory"),
-                                              "",
+                                              viewer->currentPath(),
                                               QObject::tr("Supported types (*.png *.jpg *.bmp *.zip *.rar *.7z)")
                                               );
 
@@ -29,8 +29,18 @@ void ViewerOpenFileCommand::execute(QGraphicsManagaView *viewer)
     {
         viewer->load(dir);
     }
-    widget->activateWindow();
-    widget->isActiveWindow();
+    viewer->activateWindow();
+    viewer->isActiveWindow();
+
+}
+REGISTER_COMMAND(ViewerToggleHideCommand)
+void ViewerToggleHideCommand::execute(QGraphicsManagaView *viewer)
+{
+
+    if(viewer->isHidden())
+        viewer->show();
+    else
+        viewer->hide();
 
 }
 
@@ -83,6 +93,7 @@ REGISTER_COMMAND(ViewerCloseCommand)
 void ViewerCloseCommand::execute(QGraphicsManagaView *viewer)
 {
     QMessageBox msgBox;
+    msgBox.setIconPixmap(QPixmap(":/icon/images/icon.jpg"));
     msgBox.setWindowTitle("Confirm");
     msgBox.setText("Do you want to exit MangaViewer?");
     msgBox.setInformativeText("");
@@ -90,35 +101,30 @@ void ViewerCloseCommand::execute(QGraphicsManagaView *viewer)
     msgBox.setDefaultButton(QMessageBox::Yes);
     int ret = msgBox.exec();
     if(ret==QMessageBox::Yes)
-        QApplication::activeWindow()->close();
+        viewer->close();
 }
 
 REGISTER_COMMAND(ViewerToggleTitleCommand)
 void ViewerToggleTitleCommand::execute(QGraphicsManagaView *viewer)
 {
-    QWidget *window=QApplication::activeWindow();
-    qDebug()<<window->windowFlags();
-    if(window->windowFlags().testFlag(Qt::FramelessWindowHint))
-        window->setWindowFlags(window->windowFlags()&(~Qt::FramelessWindowHint));
+    qDebug()<<viewer->windowFlags();
+    if(viewer->windowFlags().testFlag(Qt::FramelessWindowHint))
+        viewer->setWindowFlags(viewer->windowFlags()&(~Qt::FramelessWindowHint));
     else
-        window->setWindowFlags((window->windowFlags()|Qt::FramelessWindowHint)&(~(Qt::WindowTitleHint|0x1|0x1000|0x200|0x4000|0x8000|0x80000000)));
-    window->show();
+        viewer->setWindowFlags((viewer->windowFlags()|Qt::FramelessWindowHint)&(~(Qt::WindowTitleHint|0x1|0x1000|0x200|0x4000|0x8000|0x80000000)));
+    viewer->show();
 }
 
 REGISTER_COMMAND(ViewerToggleOntopCommand)
 void ViewerToggleOntopCommand::execute(QGraphicsManagaView *viewer)
 {
 
-    QWidget *window=QApplication::activeWindow();
-   // window->hide();
-    qDebug()<<window->windowFlags();
-    if(window->windowFlags().testFlag(Qt::WindowStaysOnTopHint))
-        window->setWindowFlags(window->windowFlags()&~Qt::WindowStaysOnTopHint);
+    if(viewer->windowFlags().testFlag(Qt::WindowStaysOnTopHint))
+        viewer->setWindowFlags(viewer->windowFlags()&~Qt::WindowStaysOnTopHint);
     else
-        window->setWindowFlags(window->windowFlags()|Qt::WindowStaysOnTopHint);
-    qDebug()<<window->windowFlags();
-    window->show();
-    window->isActiveWindow();
+        viewer->setWindowFlags(viewer->windowFlags()|Qt::WindowStaysOnTopHint);
+    viewer->show();
+    viewer->isActiveWindow();
 }
 
 REGISTER_COMMAND(ViewerHeightScaleUpCommand)
@@ -143,4 +149,10 @@ REGISTER_COMMAND(ViewerWidthScaleUpCommand)
 void ViewerWidthScaleUpCommand::execute(QGraphicsManagaView *viewer)
 {
     viewer->resize(viewer->width()*1.05,viewer->height());
+}
+
+REGISTER_COMMAND(ViewerToggleProgressBarCommand)
+void ViewerToggleProgressBarCommand::execute(QGraphicsManagaView *viewer)
+{
+    viewer->toggleProgressBar();
 }
