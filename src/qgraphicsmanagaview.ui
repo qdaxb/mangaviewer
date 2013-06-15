@@ -27,7 +27,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
-    <normaloff>:/images/icon/images/icon.jpg</normaloff>:/images/icon/images/icon.jpg</iconset>
+    <normaloff>:/icon/images/icon.jpg</normaloff>:/icon/images/icon.jpg</iconset>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
