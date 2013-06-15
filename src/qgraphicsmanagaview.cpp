@@ -19,6 +19,7 @@
 #include <QTextCodec>
 #include "qgraphicssimplebackgroundtextitem.h"
 #include "shortcutmanager.h"
+#include <QGraphicsTextItem>
 QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageIndexs(),fileManager(),rate(1),
@@ -33,11 +34,7 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     setStyleSheet("background-color:transparent;");
     setAttribute(Qt::WA_TranslucentBackground,true);
     progressBarHeight=3;
-
-    shortcutManager=ShortcutManager::getInstance();
-    shortcutManager->setViewer(this);
-    shortcutManager->loadFromXmlFile(QApplication::applicationDirPath ()+"/shortcuts.xml");
-
+    helpMessageItem=NULL;
     scene.setBackgroundBrush(QBrush(Qt::black));
     pageManager=new PageManager(&fileManager);
     scrollItem=new QGraphicsGridScrollItem();
@@ -49,7 +46,10 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     connect(scrollItem,SIGNAL(onLoadImage(int)),this,SLOT(onLoadImage(int)));
     connect(scrollItem,SIGNAL(onUnloadImage(int)),this,SLOT(onUnloadImage(int)));
 
-
+    shortcutManager=ShortcutManager::getInstance();
+    shortcutManager->setViewer(this);
+    connect(shortcutManager,SIGNAL(registerGlobalShortcutFailed(QKeySequence&)),this,SLOT(registerGlobalShortcutFailed(QKeySequence&)));
+    shortcutManager->loadFromXmlFile(QApplication::applicationDirPath ()+"/shortcuts.xml");
 
     setting.beginGroup("general");
     if(setting.value("noborder").toBool())
@@ -81,7 +81,7 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     }
     else
     {
-        showMsg("Axb's MangaViewer - double click to load file.",-1);
+        showMsg("Axb's MangaViewer - double click to load file.\nPress 'H' for help",-1);
     }
     leftAndRightButton=false;
     updateProgressBar();
@@ -111,7 +111,9 @@ int QGraphicsManagaView::load(QString fileorpath)
     scrollItem->setTotalItemCount(size);
     scrollItem->scrollToCell(0,0,0,0);
     scrollItem->updateView();
+    hideMsg();
     showMsg("Loaded Folder:"+fileManager.currentFolder());
+    toggleHelpMessage(true);
     updateProgressBar();
     return 0;
 }
@@ -247,19 +249,34 @@ void QGraphicsManagaView::enterEvent(QEvent *event)
 
 void QGraphicsManagaView::showMsg(QString msg, int timeInSecond)
 {
-    msgItem->setText(msg);
+    QStringList str=msgItem->text().split('\n');
+    str<<msg;
+    str.removeAll("");
+    msgItem->setText(str.join('\n'));
     msgItem->setVisible(true);
     if(timeInSecond>0)
-        msgtimer=this->startTimer(timeInSecond*1000);
+    {
+
+        int timerId=this->startTimer(timeInSecond*1000);
+        msgItem->setData(timerId,msg);
+        msgtimer.append(timerId);
+    }
+
 }
 
 void QGraphicsManagaView::timerEvent(QTimerEvent *event)
 {
     int timerid=event->timerId();
-    if(timerid==msgtimer)
+    if(msgtimer.contains(timerid))
     {
-        msgItem->setVisible(false);
+        QStringList str=msgItem->text().split('\n');
+        str.removeOne(msgItem->data(timerid).toString());
+        str.removeAll("");
+        msgItem->setText(str.join('\n'));
+        msgItem->setData(timerid,QVariant());
+        //msgItem->setVisible(false);
         killTimer(timerid);
+        msgtimer.removeOne(timerid);
     }
     else if(timerid==mouseDblClickTimer)
     {
@@ -273,6 +290,10 @@ void QGraphicsManagaView::timerEvent(QTimerEvent *event)
         }
         killTimer(timerid);
     }
+    else
+    {
+        killTimer(timerid);
+    }
 }
 
 void QGraphicsManagaView::toggleProgressBar()
@@ -280,6 +301,44 @@ void QGraphicsManagaView::toggleProgressBar()
     progressBarHeight=progressBarHeight==3?18:3;
     ui->progressBar->setTextVisible(progressBarHeight==18);
     updateLayout();
+}
+
+void QGraphicsManagaView::toggleHelpMessage(bool hide)
+{
+
+    if(helpMessageItem==NULL)
+    {
+        if(hide)
+            return;
+        QFile help(QApplication::applicationDirPath()+"/readme.html");
+        if(help.open(QFile::ReadOnly))
+        {
+            helpMessageItem=new QGraphicsTextItem();
+            helpMessageItem->setHtml(help.readAll());
+            helpMessageItem->setTextWidth(600);
+            helpMessageItem->setDefaultTextColor(Qt::white);
+            scene.addItem(helpMessageItem);
+            scrollItem->setVisible(false);
+            msgItem->setVisible(false);
+            //savedSize=size();
+            //resize(helpMessageItem->boundingRect().size().toSize());
+        }
+        help.close();
+    }
+    else
+    {
+        helpMessageItem->hide();
+        delete helpMessageItem;
+        helpMessageItem=NULL;
+        scrollItem->show();
+        msgItem->show();
+        //resize(savedSize);
+    }
+}
+
+void QGraphicsManagaView::hideMsg()
+{
+    msgItem->setText("");
 }
 
 void QGraphicsManagaView::back(qreal step)
@@ -344,7 +403,8 @@ void QGraphicsManagaView::dragEnterEvent(QDragEnterEvent *event)
 
 void QGraphicsManagaView::resizeEvent(QResizeEvent *event)
 {
-   updateLayout();
+    savedSize=event->size();
+    updateLayout();
 }
 
 void QGraphicsManagaView::updateLayout()
@@ -439,6 +499,11 @@ void QGraphicsManagaView::onUnloadImage(int index)
     pageManager->releaseImage(index);
 }
 
+void QGraphicsManagaView::registerGlobalShortcutFailed(QKeySequence &seq)
+{
+    showMsg("Failed to Register hotkey :"+seq.toString(QKeySequence::NativeText),5);
+}
+
 void QGraphicsManagaView::wheelEvent(QWheelEvent *event)
 {
     QString base="";
@@ -450,7 +515,6 @@ void QGraphicsManagaView::wheelEvent(QWheelEvent *event)
 
 void QGraphicsManagaView::keyReleaseEvent(QKeyEvent *event)
 {
-    qDebug()<<getKeySequence(event).toString();
     event->accept();
     if(event->key()==Qt::Key_AltGr||event->key()==Qt::Key_Alt)
         altKey=false;
@@ -474,7 +538,7 @@ void QGraphicsManagaView::closeEvent(QCloseEvent *event)
     setting.beginGroup("lastread");
     setting.setValue("lastfolder",fileManager.currentFolder());
     setting.setValue("lastfile",scrollItem->currentRow());
-    setting.setValue("width",scene.width());
-    setting.setValue("height",scene.height());
+    setting.setValue("width",savedSize.width());
+    setting.setValue("height",savedSize.height());
     setting.endGroup();
 }

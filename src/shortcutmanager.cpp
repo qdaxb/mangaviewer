@@ -5,6 +5,7 @@
 #include "commandregistry.h"
 #include <QDebug>
 #include "qxtglobalshortcut.h"
+
 ShortcutManager::ShortcutManager():mShortcuts(),mGlobalShortcuts()
 {
 }
@@ -42,10 +43,19 @@ void ShortcutManager::loadFromXmlFile(QString fileName)
                 if(key.hasAttribute("global"))
                 {
                     QString globalShortcut=key.text();
-                    QxtGlobalShortcut *shortCut=new QxtGlobalShortcut(QKeySequence(globalShortcut));
-                    mGlobalShortcuts[shortCut]=CommandRegistry::get("Viewer"+command+"Command");
-                    QObject::connect(shortCut,SIGNAL(activated(QxtGlobalShortcut*)),this,SLOT(globalShortcutActived(QxtGlobalShortcut*)));
-                    
+                    QxtGlobalShortcut *shortCut=new QxtGlobalShortcut();
+                    QKeySequence seq(globalShortcut);
+                    bool ok=shortCut->setShortcut(seq);
+                    if(ok)
+                    {
+                        mGlobalShortcuts[shortCut]=CommandRegistry::get("Viewer"+command+"Command");
+                        QObject::connect(shortCut,SIGNAL(activated(QxtGlobalShortcut*)),this,SLOT(globalShortcutActived(QxtGlobalShortcut*)));
+                    }
+                    else
+                    {
+                       emit registerGlobalShortcutFailed(seq);
+                    }
+
                 }
                 else
                 {

@@ -11,6 +11,7 @@
 #include "pagemanager.h"
 #include "qgraphicsgridscrollitem.h"
 class QGraphicsPagedPixmapItem;
+class QGraphicsTextItem;
 class ShortcutManager;
 
 namespace Ui {
@@ -48,6 +49,8 @@ public:
     void showMsg(QString msg, int timeInSecond=3);
     void timerEvent(QTimerEvent *event);
     void toggleProgressBar();
+    void toggleHelpMessage(bool hide=false);
+    void hideMsg();
 private:
     void init(int index=0);
     void updateLayout();
@@ -71,7 +74,7 @@ private:
     bool altKey;
     QGraphicsSimpleTextItem *msgItem;
     QPoint lastPos;
-    int msgtimer;
+    QList<int> msgtimer;
     int mouseDblClickTimer;
     qreal backgroundOpacity;
     qreal foregroundOpacity;
@@ -80,9 +83,12 @@ private:
     int progressBarHeight;
     int moveDelta;
     qreal moveRate;
+    QGraphicsTextItem *helpMessageItem;
+    QSize savedSize;
 private slots:
     void onLoadImage(int index);
     void onUnloadImage(int index);
+    void registerGlobalShortcutFailed(QKeySequence& seq);
 };
 
 #endif // QGRAPHICSMANAGAVIEW_H

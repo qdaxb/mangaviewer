@@ -72,7 +72,7 @@ SOURCES += filemanager.cpp \
     pagemanager.cpp \
     zlib/zutil.c \
     qgraphicssimplebackgroundtextitem.cpp \
-    settingsdialog.cpp \
+ #   settingsdialog.cpp \
     shortcutmanager.cpp
 
 
@@ -140,11 +140,11 @@ HEADERS  +=    filemanager.h \
     pagemanager.h \
     zlib/zutil.h \
     qgraphicssimplebackgroundtextitem.h \
-    settingsdialog.h \
+   # settingsdialog.h \
     shortcutmanager.h
 
-FORMS    +=  qgraphicsmanagaview.ui \
-    settingsdialog.ui
+FORMS    +=  qgraphicsmanagaview.ui
+   # settingsdialog.ui
 
 
 INCLUDEPATH+= ./include

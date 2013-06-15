@@ -1,5 +1,6 @@
 #ifndef COMMON_H
 #define COMMON_H
+#include <QString>
 namespace Manga{
 enum splitType{SPLIT_AUTO,SPLIT_NONE,SPLIT_ALWAYS};
 }
@@ -21,4 +22,5 @@ public:
         return &instance;
     }
 };
+
 #endif // COMMON_H

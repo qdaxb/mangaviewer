@@ -10,27 +10,70 @@
 #include <QMessageBox>
 #include <QWidget>
 #include <QIcon>
+#include <QDir>
+#include <QUrl>
+#include "common.h"
 ViewerCommand::ViewerCommand()
 {
+}
+bool fileNameSort(const QString &str1, const QString &str2)
+{
+    if(str1.length()==str2.length())
+    {
+        return str1<str2;
+    }
+    return str1.length()<str2.length();
 }
 REGISTER_COMMAND(ViewerOpenFileCommand)
 void ViewerOpenFileCommand::execute(QGraphicsManagaView *viewer)
 {
-    QString dir =QFileDialog::getOpenFileName(0, ("Open Directory"),
-                                              viewer->currentPath(),
-                                              QObject::tr("Supported types (*.png *.jpg *.bmp *.zip *.rar *.7z)")
-                                              );
+    QString path=viewer->currentPath();
+    QString file;
+    QList<QUrl> urls;
 
-    if(dir=="")
+
+    if(!path.isEmpty())
     {
-        return;
+        QFileInfo fileInfo(path);
+        QDir parent(fileInfo.absoluteDir());
+        if(parent.exists())
+        {
+            path=parent.absolutePath();
+            QStringList list=parent.entryList(QDir::AllEntries|QDir::NoDotAndDotDot,QDir::LocaleAware|QDir::Name);
+            qSort(list.begin(),list.end(),fileNameSort);
+            int i=list.indexOf(fileInfo.fileName());
+            file=list.at(i);
+            if(fileInfo.isDir())
+            {
+
+                if(i>0)
+                    urls<<QUrl::fromLocalFile(parent.absoluteFilePath(list.at(i-1)));
+                urls<<QUrl::fromLocalFile(parent.absoluteFilePath(list.at(i)));
+                if(i!=list.size()-1)
+                    urls<<QUrl::fromLocalFile(parent.absoluteFilePath(list.at(i+1)));
+
+            }
+        }
+
+
     }
-    else
+    QFileDialog dialog(0,("Open File"),
+                       path,
+                       QObject::tr("Supported types (*.png *.jpg *.bmp *.zip *.rar *.7z)"));
+    dialog.setOption(QFileDialog::DontUseNativeDialog);
+    dialog.setViewMode(QFileDialog::Detail);
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.selectFile(file);
+
+    dialog.setSidebarUrls(urls);
+    if(dialog.exec())
     {
-        viewer->load(dir);
+        QStringList dir =dialog.selectedFiles();
+        if(dir.isEmpty())
+            return;
+        viewer->load(dir.first());
+        viewer->activateWindow();
     }
-    viewer->activateWindow();
-    viewer->isActiveWindow();
 
 }
 REGISTER_COMMAND(ViewerToggleHideCommand)
@@ -155,4 +198,9 @@ REGISTER_COMMAND(ViewerToggleProgressBarCommand)
 void ViewerToggleProgressBarCommand::execute(QGraphicsManagaView *viewer)
 {
     viewer->toggleProgressBar();
+}
+REGISTER_COMMAND(ViewerToggleHelpMessageCommand)
+void ViewerToggleHelpMessageCommand::execute(QGraphicsManagaView *viewer)
+{
+    viewer->toggleHelpMessage();
 }

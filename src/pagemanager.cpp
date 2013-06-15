@@ -74,7 +74,6 @@ void PageManager::loadFromFile(int fileIndex)
     {
         if(mImages.contains(startIndex+i))
         {
-            qDebug()<<"a";
             continue;
         }
         if(image.width()>image.height())
