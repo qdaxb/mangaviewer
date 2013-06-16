@@ -107,14 +107,19 @@ int FileManager::load(QString fileorpath)
     QFileInfo fileInfo(fileorpath);
     if(!fileInfo.exists())
         return -1;
+    if(currentFolderLoader!=NULL)
+    {
+        delete currentFolderLoader;
+        currentFolderLoader=NULL;
+    }
     if(fileInfo.isDir())
-        loadFromFolder(fileorpath);
+        return loadFromFolder(fileorpath);
     else
     {
         QString ext=fileInfo.suffix();
         if(ZipFileLoader::isZipFile(ext))
         {
-            loadFromZipFile(fileorpath);
+            return loadFromZipFile(fileorpath);
         }
         else
         {
@@ -123,22 +128,24 @@ int FileManager::load(QString fileorpath)
             QString ext=folderInfo.suffix();
             if(folderInfo.isDir())
             {
-                loadFromFolder(folder);
+                return loadFromFolder(folder);
             }
             else if(ZipFileLoader::isZipFile(ext))
             {
-                loadFromZipFile(fileorpath);
+                return loadFromZipFile(fileorpath);
             }
 
         }
     }
-    return 0;
+    return -1;
 
 }
 int FileManager::loadFromZipFile(QString path)
 {
     currentFolderLoader=new ZipFileLoader(path);
-    currentFolderLoader->open();
+    int rtn=currentFolderLoader->open();
+    if(rtn==-1)
+        return -1;
     folderStack->push(currentFolderLoader);
     fileListInCurrentFolder->clear();
     QStringList files=currentFolderLoader->fileList();

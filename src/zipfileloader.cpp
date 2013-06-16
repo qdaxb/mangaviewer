@@ -44,8 +44,8 @@ int ZipFileLoader::open()
     fex_free_path( path );
     if(rtn==NULL)
     {
-    isOpend=true;
-    return 0;
+        isOpend=true;
+        return 0;
     }
     else
     {
@@ -58,8 +58,7 @@ int ZipFileLoader::open(QString path)
     this->zipFileName=path;
     if(isOpend)
         close();
-    open();
-    return 0;
+    return open();
 }
 int ZipFileLoader::close()
 {
