@@ -50,6 +50,7 @@ public:
     void timerEvent(QTimerEvent *event);
     void toggleProgressBar();
     void toggleHelpMessage(bool hide=false);
+    void toggleSplitPage();
     void hideMsg();
 private:
     void init(int index=0);
@@ -85,6 +86,7 @@ private:
     qreal moveRate;
     QGraphicsTextItem *helpMessageItem;
     QSize savedSize;
+    void showSplitMsg();
 private slots:
     void onLoadImage(int index);
     void onUnloadImage(int index);

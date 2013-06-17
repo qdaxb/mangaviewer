@@ -33,8 +33,6 @@ void PageManager::releaseImage(int index)
 
 int PageManager::size()
 {
-    if(mSplitMode==SPLIT_NONE)
-        return mFileManager->size();
     return mFileManager->size()*mColumnCount;
 }
 
@@ -70,18 +68,20 @@ void PageManager::loadFromFile(int fileIndex)
 
     qreal columnWidth=image.width()/mColumnCount;
     int startIndex=pageIndexOfFile(fileIndex);
+    bool needSplit=mSplitMode==SPLIT_ALL;
+    needSplit=needSplit||((mSplitMode==SPLIT_AUTO)&&image.width()>image.height());
     for(int i=0;i<mColumnCount;i++)
     {
         if(mImages.contains(startIndex+i))
         {
             continue;
         }
-        if(image.width()>image.height())
+        if(needSplit)
             mImages[startIndex+i]=new QImage(image.copy(QRect((mColumnCount-i-1)*columnWidth,0,columnWidth,image.height())));
         else
         {
             if(i==0)
-                 mImages[startIndex+i]=new QImage(image);
+                mImages[startIndex+i]=new QImage(image);
             else
                 mImages[startIndex+i]=new QImage();
         }
@@ -92,18 +92,18 @@ void PageManager::loadFromFile(int fileIndex)
 
 int PageManager::pageIndexOfFile(int fileIndex)
 {
-    if(mSplitMode==SPLIT_NONE)
-        return fileIndex;
-    else
-        return fileIndex*mColumnCount;
+    //    if(mSplitMode==SPLIT_NONE)
+    //        return fileIndex;
+    //    else
+    return fileIndex*mColumnCount;
 }
 
 int PageManager::fileIndexOfPage(int pageIndex)
 {
-    if(mSplitMode==SPLIT_NONE)
-        return pageIndex;
-    else
-        return pageIndex/mColumnCount;
+    //    if(mSplitMode==SPLIT_NONE)
+    //        return pageIndex;
+    //    else
+    return pageIndex/mColumnCount;
 }
 
 void PageManager::clear()
@@ -136,4 +136,17 @@ int PageManager::calucatePageCount(int fileIndex)
         return 1;
     Q_ASSERT(0);
 
+}
+
+
+int PageManager::setSplitMode(PageManager::SplitMode mode)
+{
+    this->mSplitMode=mode;
+    QList<QImage*> images=mImages.values();
+    for(int i=0;i<images.size();i++)
+    {
+        delete images.at(i);
+    }
+    mImages.clear();
+    return 0;
 }

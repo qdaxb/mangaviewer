@@ -58,6 +58,10 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     foregroundOpacity=std::max(0.1,setting.value("foregroundOpacity").toReal());
     moveDelta=setting.value("moveDelta").toReal();
     moveRate=setting.value("moveRate").toReal();
+    if(!setting.value("splitPage").toBool())
+    {
+        pageManager->setSplitMode(PageManager::SPLIT_NONE);
+    }
     setting.endGroup();
     setting.beginGroup("lastread");
     QString folder=setting.value("lastfolder").toString();
@@ -113,6 +117,7 @@ int QGraphicsManagaView::load(QString fileorpath)
     scrollItem->updateView();
     hideMsg();
     showMsg("Loaded Folder:"+fileManager.currentFolder());
+    showSplitMsg();
     toggleHelpMessage(true);
     updateProgressBar();
     return 0;
@@ -336,6 +341,27 @@ void QGraphicsManagaView::toggleHelpMessage(bool hide)
     }
 }
 
+void QGraphicsManagaView::toggleSplitPage()
+{
+    if(pageManager->splitMode()==PageManager::SPLIT_AUTO)
+    {
+        pageManager->setSplitMode(PageManager::SPLIT_NONE);
+
+    }
+    else
+    {
+        pageManager->setSplitMode(PageManager::SPLIT_AUTO);
+
+    }
+    showSplitMsg();
+    int row=scrollItem->currentRow();
+
+    scrollItem->clear();
+    scrollItem->setTotalItemCount(pageManager->size());
+    scrollItem->scrollToCell(row,0,0,0);
+    scrollItem->updateView();
+}
+
 void QGraphicsManagaView::hideMsg()
 {
     msgItem->setText("");
@@ -488,6 +514,18 @@ QKeySequence QGraphicsManagaView::getKeySequence(QKeyEvent *event)
     return QKeySequence(keyInt).toString(QKeySequence::NativeText);
 }
 
+void QGraphicsManagaView::showSplitMsg()
+{
+    if(pageManager->splitMode()==PageManager::SPLIT_NONE)
+    {
+        showMsg("Split Page:OFF");
+    }
+    else
+    {
+        showMsg("Split Page:ON");
+    }
+}
+
 void QGraphicsManagaView::onLoadImage(int index)
 {
     scrollItem->setImage(index,pageManager->getImage(index));
@@ -534,6 +572,7 @@ void QGraphicsManagaView::closeEvent(QCloseEvent *event)
     setting.setValue("noborder",this->windowFlags().testFlag(Qt::FramelessWindowHint));
     setting.setValue("backgroundOpacity",backgroundOpacity);
     setting.setValue("foregroundOpacity",foregroundOpacity);
+    setting.setValue("splitPage",pageManager->splitMode()==PageManager::SPLIT_AUTO);
     setting.endGroup();
     setting.beginGroup("lastread");
     setting.setValue("lastfolder",fileManager.currentFolder());

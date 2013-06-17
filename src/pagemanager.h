@@ -40,6 +40,7 @@ public:
     int setColumnCount(int count);
     int fileIndexOfPage(int pageIndex);
     void clear();
+    SplitMode splitMode(){return mSplitMode;}
 private:
     FileManager *mFileManager;
     SplitMode mSplitMode;

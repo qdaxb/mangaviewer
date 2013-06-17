@@ -299,6 +299,11 @@ void QGraphicsGridScrollItem::clear()
     mTotalItemCount=0;
 }
 
+void QGraphicsGridScrollItem::clearImage()
+{
+    mImages.clear();
+}
+
 
 void QGraphicsGridScrollItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
@@ -307,7 +312,7 @@ void QGraphicsGridScrollItem::paint(QPainter *painter, const QStyleOptionGraphic
 void QGraphicsGridScrollItem::scrollToCell(int row, int column, int offsetx, int offsety)
 {
     row=std::max(row,0);
-    row=std::min(row,mTotalItemCount/mColumnCount);
+    row=std::min(row,mTotalItemCount/mColumnCount-1);
     mShowingCells.setTop(row);
     mShowingCells.setHeight(0);
     prepareLayout();
