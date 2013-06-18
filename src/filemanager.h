@@ -24,6 +24,7 @@ public:
     int get(QString fileName);
     QByteArray loadData(int index);
     static bool isSuffixAcceptable(QString suffix);
+    int indexOf(QString filePath);
 private:
     QStringList *fileListInCurrentFolder;
     QStack<FolderLoader*>* folderStack;

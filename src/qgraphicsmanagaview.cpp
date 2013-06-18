@@ -56,6 +56,9 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     setting.beginGroup("general");
     if(setting.value("noborder").toBool())
         this->setWindowFlags(Qt::FramelessWindowHint);
+    transformationMode=setting.value("transformationmode","better").toString();
+    if(transformationMode=="faster")
+        scrollItem->setTransformationMode(Qt::FastTransformation);
     backgroundOpacity=std::max(0.1,setting.value("backgroundOpacity").toReal());
     foregroundOpacity=std::max(0.1,setting.value("foregroundOpacity").toReal());
     moveDelta=setting.value("moveDelta").toReal();
@@ -115,8 +118,16 @@ int QGraphicsManagaView::load(QString fileorpath)
         showMsg("Folder has no images: "+fileorpath,5);
         return -1;
     }
+    QFileInfo file(fileorpath);
+    int index=-1;
+    if(file.isFile())
+        index= fileManager.indexOf(file.fileName());
+    if(index!=-1)
+         index=pageManager->pageIndexOfFile(index);
+    else
+        index=0;
     scrollItem->setTotalItemCount(size);
-    scrollItem->scrollToCell(0,0,0,0);
+    scrollItem->scrollToCell(index,0,0,0);
     scrollItem->updateView();
     hideMsg();
     showMsg("Loaded Folder:"+fileManager.currentFolder());
@@ -365,6 +376,20 @@ void QGraphicsManagaView::toggleSplitPage()
     scrollItem->updateView();
 }
 
+void QGraphicsManagaView::toggleTransformMode()
+{
+    Qt::TransformationMode mode=scrollItem->transformationMode();
+    if(mode==Qt::FastTransformation)
+        scrollItem->setTransformationMode(Qt::SmoothTransformation);
+    else
+        scrollItem->setTransformationMode(Qt::FastTransformation);
+    transformationMode=scrollItem->transformationMode()==Qt::FastTransformation?"faster":"better";
+    showMsg("Transformation mode:"+transformationMode);
+    scrollItem->prepareResize();
+    scrollItem->updateView();
+
+}
+
 void QGraphicsManagaView::hideMsg()
 {
     msgItem->setText("");
@@ -494,6 +519,7 @@ void QGraphicsManagaView::updateLayout()
     scene.setSceneRect(QRect(QPoint(0,0),size));
     //scene.setSceneRect(QRect(QPoint(0,0),this->size()));
     scrollItem->setVisibleArea(size.width(),size.height());
+    scrollItem->prepareResize();
     scrollItem->updateView();
 }
 
@@ -622,6 +648,7 @@ void QGraphicsManagaView::closeEvent(QCloseEvent *event)
     setting.setValue("backgroundOpacity",backgroundOpacity);
     setting.setValue("foregroundOpacity",foregroundOpacity);
     setting.setValue("splitPage",pageManager->splitMode()==PageManager::SPLIT_AUTO);
+    setting.setValue("transformationmode",transformationMode);
     setting.endGroup();
     setting.beginGroup("lastread");
     setting.setValue("lastfolder",fileManager.currentFolder());

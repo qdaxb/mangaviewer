@@ -41,6 +41,7 @@ public:
     int fileIndexOfPage(int pageIndex);
     void clear();
     SplitMode splitMode(){return mSplitMode;}
+    int pageIndexOfFile(int fileIndex);
 private:
     FileManager *mFileManager;
     SplitMode mSplitMode;
@@ -49,7 +50,6 @@ private:
     int mInitilzed;
     QMap<int,QImage*> mImages;
     QMap<int,Arrange<int> > mPageArrangeOfFile;
-    int pageIndexOfFile(int fileIndex);
     void loadFromFile(int fileIndex);
     int calucatePageCount(int fileIndex);
 };

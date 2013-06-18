@@ -34,24 +34,30 @@ void ViewerOpenFileCommand::execute(QGraphicsManagaView *viewer)
 
     if(!path.isEmpty())
     {
+
         QFileInfo fileInfo(path);
         QDir parent(fileInfo.absoluteDir());
+
         if(parent.exists())
         {
+            qDebug()<<parent;
             path=parent.absolutePath();
             QStringList list=parent.entryList(QDir::AllEntries|QDir::NoDotAndDotDot,QDir::LocaleAware|QDir::Name);
             qSort(list.begin(),list.end(),fileNameSort);
             int i=list.indexOf(fileInfo.fileName());
-            file=list.at(i);
-            if(fileInfo.isDir())
+            if(i!=-1)
             {
+                file=list.at(i);
+                if(fileInfo.isDir())
+                {
 
-                if(i>0)
-                    urls<<QUrl::fromLocalFile(parent.absoluteFilePath(list.at(i-1)));
-                urls<<QUrl::fromLocalFile(parent.absoluteFilePath(list.at(i)));
-                if(i!=list.size()-1)
-                    urls<<QUrl::fromLocalFile(parent.absoluteFilePath(list.at(i+1)));
+                    if(i>0)
+                        urls<<QUrl::fromLocalFile(parent.absoluteFilePath(list.at(i-1)));
+                    urls<<QUrl::fromLocalFile(parent.absoluteFilePath(list.at(i)));
+                    if(i!=list.size()-1)
+                        urls<<QUrl::fromLocalFile(parent.absoluteFilePath(list.at(i+1)));
 
+                }
             }
         }
 
@@ -213,4 +219,9 @@ REGISTER_COMMAND(ViewerGotoPageCommand)
 void ViewerGotoPageCommand::execute(QGraphicsManagaView *viewer)
 {
     viewer->gotoPage(viewer->gotoDialog()<<1);
+}
+REGISTER_COMMAND(ViewerTransformationModeCommand)
+void ViewerTransformationModeCommand::execute(QGraphicsManagaView *viewer)
+{
+    viewer->toggleTransformMode();
 }

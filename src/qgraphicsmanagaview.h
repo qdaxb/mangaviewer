@@ -52,6 +52,7 @@ public:
     void toggleProgressBar();
     void toggleHelpMessage(bool hide=false);
     void toggleSplitPage();
+    void toggleTransformMode();
     void hideMsg();
     bool eventFilter(QObject *obj, QEvent *event);
     int gotoDialog();
@@ -90,6 +91,7 @@ private:
     QGraphicsTextItem *helpMessageItem;
     QSize savedSize;
     void showSplitMsg();
+    QString transformationMode;
 private slots:
     void onLoadImage(int index);
     void onUnloadImage(int index);

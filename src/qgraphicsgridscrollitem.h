@@ -43,6 +43,9 @@ public:
     bool emptyRow(int row){return rowHeight(row)<=0;}
     virtual void clear();
     void clearImage();
+    void prepareResize(){this->mNeedResize=true;}
+    void setTransformationMode(Qt::TransformationMode mode){this->mMode=mode;}
+    Qt::TransformationMode transformationMode(){return mMode;}
 private:
     QGraphicsPixmapItem *getOrCreateItemAt(int row,int column);
     QGraphicsPixmapItem *getCachedItem();
@@ -77,6 +80,8 @@ private:
     LayoutMethods mLayoutMethod;
     bool needLayout;
     QRect mScrollArea;
+    bool mNeedResize;
+    Qt::TransformationMode mMode;
 
 signals:
     void onLoadImage(int imdex);

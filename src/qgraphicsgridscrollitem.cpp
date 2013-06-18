@@ -7,6 +7,8 @@ QGraphicsGridScrollItem::QGraphicsGridScrollItem(QGraphicsItem *parent):QGraphic
     mShowingCells.setHeight(0);
     prepareLayout();
     mTotalItemCount=0;
+    mNeedResize=true;
+    mMode=Qt::SmoothTransformation;
 }
 
 QRectF QGraphicsGridScrollItem::boundingRect() const
@@ -111,7 +113,7 @@ void QGraphicsGridScrollItem::createShowingItems()
         {
             int column=mLayoutMethod.testFlag(RIGHT_TO_LEFT)?mColumnCount-j:j;
             QGraphicsPixmapItem *item=getOrCreateItemAt(row,column);
-            if(item->data(1).toInt()==1)
+            if(item->data(1).toInt()==1||mNeedResize)
             {
                 QImage *image=getImage(indexOf(row,column));
                 if(image==NULL||image->isNull())
@@ -119,19 +121,26 @@ void QGraphicsGridScrollItem::createShowingItems()
 
                     image=new QImage(QSize(this->mVisibleSize.width(),1),QImage::Format_RGB16);
                 }
-                item->setPixmap(QPixmap::fromImage(*image));
+                if(mMode==Qt::SmoothTransformation)
+                    item->setPixmap(QPixmap::fromImage(*image).scaledToWidth(this->mVisibleSize.width(),Qt::SmoothTransformation));
+                else
+                    item->setPixmap(QPixmap::fromImage(*image));
                 item->setData(1,0);
-                //itemWidthTo(item,columnWidth);
             }
         }
     }
     needLayout=false;
+    mNeedResize=false;
 }
 
 QGraphicsPixmapItem *QGraphicsGridScrollItem::getCachedItem()
 {
     if(mCacheItems.empty())
-        return new QGraphicsPixmapItem(this);
+     {
+
+        QGraphicsPixmapItem *item=new QGraphicsPixmapItem(this);
+        return item;
+    }
     else
     {
         QGraphicsPixmapItem *item=mCacheItems.first();
