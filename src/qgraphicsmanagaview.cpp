@@ -20,6 +20,8 @@
 #include "qgraphicssimplebackgroundtextitem.h"
 #include "shortcutmanager.h"
 #include <QGraphicsTextItem>
+#include <QSpinBox>
+#include "gotodialog.h"
 QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageIndexs(),fileManager(),rate(1),
@@ -68,6 +70,7 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     int file=setting.value("lastfile").toInt();
     qreal width=setting.value("width").toReal();
     qreal height=setting.value("height").toReal();
+    ui->progressBar->installEventFilter(this);
     setting.endGroup();
     if((width>0)&&(height>0))
         this->resize(width,height);
@@ -85,11 +88,11 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     }
     else
     {
-        showMsg("Axb's MangaViewer - double click to load file.\nPress 'H' for help",-1);
+        showMsg("Axb's MangaViewer - double click to load file.",-1);
     }
     leftAndRightButton=false;
     updateProgressBar();
-
+    showMsg("Press 'H' for help.",5);
     altKey=false;
 }
 
@@ -367,6 +370,45 @@ void QGraphicsManagaView::hideMsg()
     msgItem->setText("");
 }
 
+bool QGraphicsManagaView::eventFilter(QObject *obj, QEvent *event)
+{
+    if(obj==ui->progressBar)
+    {
+        if(event->type()==QEvent::MouseButtonPress)
+        {
+            QMouseEvent *mouseEvent=dynamic_cast<QMouseEvent*>(event);
+            if(mouseEvent->button()==Qt::LeftButton)
+            {
+                int current=((qreal)mouseEvent->pos().x())/ui->progressBar->width()*pageManager->size();
+                gotoPage(current-1);
+                return true;
+            }
+            else if(mouseEvent->button()==Qt::RightButton)
+            {
+                int rtn=gotoDialog();
+                if(rtn!=-1)
+                    gotoPage(rtn<<1);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+int QGraphicsManagaView::gotoDialog()
+{
+    GotoDialog dialog;
+    dialog.move(this->pos()+QPoint((this->width()-dialog.width())>>1,(this->height()-dialog.height())>>1));
+    dialog.setWindowFlags(Qt::FramelessWindowHint);
+    dialog.focusOnSpin();
+    dialog.setMax(ui->progressBar->maximum());
+    dialog.setCurrent(ui->progressBar->value());
+    if(dialog.exec())
+        return dialog.page()-1;
+    else
+        return -1;
+}
+
 void QGraphicsManagaView::back(qreal step)
 {
     scrollItem->scrollBy(0,100);
@@ -387,6 +429,13 @@ void QGraphicsManagaView::perviousPage()
         scrollItem->scrollToCell(scrollItem->currentRow()-2,0,0,0);
     else
         scrollItem->scrollToCell(scrollItem->currentRow()-1,0,0,0);
+    scrollItem->updateView();
+    updateProgressBar();
+}
+
+int QGraphicsManagaView::gotoPage(int page)
+{
+    scrollItem->scrollToCell(page,0,0,0);
     scrollItem->updateView();
     updateProgressBar();
 }
@@ -553,17 +602,17 @@ void QGraphicsManagaView::wheelEvent(QWheelEvent *event)
 
 void QGraphicsManagaView::keyReleaseEvent(QKeyEvent *event)
 {
-    event->accept();
+    //event->accept();
     if(event->key()==Qt::Key_AltGr||event->key()==Qt::Key_Alt)
         altKey=false;
-    else
-        shortcutManager->getCommand(getKeySequence(event).toString().toUpper())->execute(this);
+
 }
 
 void QGraphicsManagaView::keyPressEvent(QKeyEvent *event)
 {
     if(event->key()==Qt::Key_AltGr||event->key()==Qt::Key_Alt)
         altKey=true;
+    shortcutManager->getCommand(getKeySequence(event).toString().toUpper())->execute(this);
 }
 
 void QGraphicsManagaView::closeEvent(QCloseEvent *event)

@@ -30,6 +30,7 @@ public:
     void back(qreal step=-1);
     void nextPage();
     void perviousPage();
+    int gotoPage(int page);
     void dropEvent(QDropEvent *event);
     void dragEnterEvent(QDragEnterEvent *);
     void resizeEvent(QResizeEvent *event);
@@ -52,6 +53,8 @@ public:
     void toggleHelpMessage(bool hide=false);
     void toggleSplitPage();
     void hideMsg();
+    bool eventFilter(QObject *obj, QEvent *event);
+    int gotoDialog();
 private:
     void init(int index=0);
     void updateLayout();
