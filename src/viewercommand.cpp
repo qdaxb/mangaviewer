@@ -209,3 +209,8 @@ void ViewerToggleSplitPageCommand::execute(QGraphicsManagaView *viewer)
 {
     viewer->toggleSplitPage();
 }
+REGISTER_COMMAND(ViewerGotoPageCommand)
+void ViewerGotoPageCommand::execute(QGraphicsManagaView *viewer)
+{
+    viewer->gotoPage(viewer->gotoDialog()<<1);
+}

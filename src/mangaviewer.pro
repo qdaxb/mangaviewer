@@ -73,7 +73,8 @@ SOURCES += filemanager.cpp \
     zlib/zutil.c \
     qgraphicssimplebackgroundtextitem.cpp \
  #   settingsdialog.cpp \
-    shortcutmanager.cpp
+    shortcutmanager.cpp \
+    gotodialog.cpp
 
 
 HEADERS  +=    filemanager.h \
@@ -141,9 +142,11 @@ HEADERS  +=    filemanager.h \
     zlib/zutil.h \
     qgraphicssimplebackgroundtextitem.h \
    # settingsdialog.h \
-    shortcutmanager.h
+    shortcutmanager.h \
+    gotodialog.h
 
-FORMS    +=  qgraphicsmanagaview.ui
+FORMS    +=  qgraphicsmanagaview.ui \
+    gotodialog.ui
    # settingsdialog.ui
 
 
