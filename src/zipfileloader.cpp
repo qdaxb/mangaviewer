@@ -38,10 +38,13 @@ int ZipFileLoader::open()
 {
     if(isOpend)
         return 0;
+#ifdef WIN32
     char* path=fex_wide_to_path( zipFileName.toStdWString().data() );
     const char *rtn=fex_open( &fex, path );
-
     fex_free_path( path );
+#else
+    const char *rtn=fex_open( &fex, zipFileName.toStdString().data() );
+#endif
     if(rtn==NULL)
     {
         isOpend=true;

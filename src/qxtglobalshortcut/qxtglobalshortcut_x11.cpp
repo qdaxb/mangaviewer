@@ -49,7 +49,7 @@ static int qxt_x_errhandler(Display* display, XErrorEvent *event)
     }
 }
 
-bool QxtGlobalShortcutPrivate::eventFilter(void* message)
+bool QxtGlobalShortcutPrivate::nativeEventFilter(const QByteArray &eventType, void *message, long *result)
 {
     XEvent* event = static_cast<XEvent*>(message);
     if (event->type == KeyPress)
