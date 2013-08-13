@@ -48,11 +48,13 @@ void ShortcutManager::loadFromXmlFile(QString fileName)
                     bool ok=shortCut->setShortcut(seq);
                     if(ok)
                     {
+                        qDebug()<<"register success:"<<seq;
                         mGlobalShortcuts[shortCut]=CommandRegistry::get("Viewer"+command+"Command");
                         QObject::connect(shortCut,SIGNAL(activated(QxtGlobalShortcut*)),this,SLOT(globalShortcutActived(QxtGlobalShortcut*)));
                     }
                     else
                     {
+                        qDebug()<<"register failed:"<<seq;
                        emit registerGlobalShortcutFailed(seq);
                     }
 

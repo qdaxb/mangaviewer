@@ -6,6 +6,7 @@
 #include <QDebug>
 #include "zipfileloader.h"
 #include "localfolderloader.h"
+#include "common.h"
 FileManager::FileManager()
 {
     fileListInCurrentFolder=new QStringList();
@@ -164,6 +165,7 @@ int FileManager::loadFromFolder(QString path)
     this->folderStack->push(currentFolderLoader);
     this->fileListInCurrentFolder->clear();
     QStringList files=currentFolderLoader->fileList();
+    qSort(files.begin(),files.end(),fileNameLessThan);
     for(int i=0;i<files.size();i++)
     {
         if(isSuffixAcceptable( files.at(i).split('.').last()))

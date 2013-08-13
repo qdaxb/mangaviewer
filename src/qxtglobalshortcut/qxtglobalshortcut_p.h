@@ -26,10 +26,9 @@
 #define QXTGLOBALSHORTCUT_P_H
 
 #include "qxtglobalshortcut.h"
-#include <QAbstractEventDispatcher>
+#include <QAbstractNativeEventFilter>
 #include <QKeySequence>
 #include <QHash>
-#include <QAbstractNativeEventFilter>
 
 class QxtGlobalShortcutPrivate : public QxtPrivate<QxtGlobalShortcut>,public QAbstractNativeEventFilter
 {

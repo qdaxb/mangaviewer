@@ -53,7 +53,7 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     connect(shortcutManager,SIGNAL(registerGlobalShortcutFailed(QKeySequence&)),this,SLOT(registerGlobalShortcutFailed(QKeySequence&)));
     shortcutManager->loadFromXmlFile(QApplication::applicationDirPath ()+"/shortcuts.xml");
 
-    setting.beginGroup("general");
+    setting.beginGroup("normal");
     if(setting.value("noborder").toBool())
         this->setWindowFlags(Qt::FramelessWindowHint);
     transformationMode=setting.value("transformationmode","better").toString();
@@ -271,7 +271,7 @@ void QGraphicsManagaView::showMsg(QString msg, int timeInSecond)
     QStringList str=msgItem->text().split('\n');
     str<<msg;
     str.removeAll("");
-    msgItem->setText(str.join('\n'));
+    msgItem->setText(str.join("\n"));
     msgItem->setVisible(true);
     if(timeInSecond>0)
     {
@@ -291,7 +291,7 @@ void QGraphicsManagaView::timerEvent(QTimerEvent *event)
         QStringList str=msgItem->text().split('\n');
         str.removeOne(msgItem->data(timerid).toString());
         str.removeAll("");
-        msgItem->setText(str.join('\n'));
+        msgItem->setText(str.join("\n"));
         msgItem->setData(timerid,QVariant());
         //msgItem->setVisible(false);
         killTimer(timerid);
@@ -643,7 +643,7 @@ void QGraphicsManagaView::keyPressEvent(QKeyEvent *event)
 
 void QGraphicsManagaView::closeEvent(QCloseEvent *event)
 {
-    setting.beginGroup("general");
+    setting.beginGroup("normal");
     setting.setValue("noborder",this->windowFlags().testFlag(Qt::FramelessWindowHint));
     setting.setValue("backgroundOpacity",backgroundOpacity);
     setting.setValue("foregroundOpacity",foregroundOpacity);

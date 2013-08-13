@@ -31,6 +31,7 @@ QStringList ZipFileLoader::fileList()
             currentIndex++;
         }
     }
+
     return zippedFileNames;
 }
 
