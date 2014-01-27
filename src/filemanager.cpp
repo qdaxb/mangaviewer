@@ -150,13 +150,13 @@ int FileManager::loadFromZipFile(QString path)
     folderStack->push(currentFolderLoader);
     fileListInCurrentFolder->clear();
     QStringList files=currentFolderLoader->fileList();
+    qSort(files.begin(),files.end(),fileNameLessThan);
     for(int i=0;i<files.size();i++)
     {
         if(isSuffixAcceptable( files.at(i).split('.').last()))
         fileListInCurrentFolder->append(files.at(i));
     }
-
-    fileListInCurrentFolder->sort();
+    return 0;
 }
 
 int FileManager::loadFromFolder(QString path)

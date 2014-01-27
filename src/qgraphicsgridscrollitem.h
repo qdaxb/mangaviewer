@@ -46,6 +46,9 @@ public:
     void prepareResize(){this->mNeedResize=true;}
     void setTransformationMode(Qt::TransformationMode mode){this->mMode=mode;}
     Qt::TransformationMode transformationMode(){return mMode;}
+    int currentImageIndex();
+    QImage *getImage(int index);
+    QSize currentItemSize();
 private:
     QGraphicsPixmapItem *getOrCreateItemAt(int row,int column);
     QGraphicsPixmapItem *getCachedItem();
@@ -74,7 +77,6 @@ private:
     QList<QGraphicsPixmapItem*> mShowingItems;
     QList<QGraphicsPixmapItem*> mCacheItems;
     QMap<int,QImage*> mImages;
-    QImage *getImage(int index);
     QMap<int,qreal> rowHeights;
     int mTotalItemCount;
     LayoutMethods mLayoutMethod;

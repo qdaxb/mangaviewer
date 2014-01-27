@@ -53,6 +53,7 @@ public:
     void toggleHelpMessage(bool hide=false);
     void toggleSplitPage();
     void toggleTransformMode();
+    void fitImage();
     void hideMsg();
     bool eventFilter(QObject *obj, QEvent *event);
     int gotoDialog();
@@ -70,6 +71,7 @@ private:
     QGraphicsGridScrollItem *scrollItem;
     bool isLastPage;
     bool isFirstPage;
+    int moveStep;
     qreal rate;
     QSettings setting;
     QPoint dragPosition;

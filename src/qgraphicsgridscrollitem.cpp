@@ -97,6 +97,11 @@ QImage *QGraphicsGridScrollItem::getImage(int index)
     return NULL;
 }
 
+QSize QGraphicsGridScrollItem::currentItemSize()
+{
+    return getOrCreateItemAt(mShowingCells.top(),0)->boundingRect().size().toSize();
+}
+
 
 void QGraphicsGridScrollItem::placeToCell(QGraphicsPixmapItem *item, int row, int column)
 {
@@ -131,6 +136,11 @@ void QGraphicsGridScrollItem::createShowingItems()
     }
     needLayout=false;
     mNeedResize=false;
+}
+
+int QGraphicsGridScrollItem::currentImageIndex()
+{
+    return indexOf(mShowingCells.top(),0);
 }
 
 QGraphicsPixmapItem *QGraphicsGridScrollItem::getCachedItem()

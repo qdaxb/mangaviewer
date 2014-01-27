@@ -225,3 +225,8 @@ void ViewerTransformationModeCommand::execute(QGraphicsManagaView *viewer)
 {
     viewer->toggleTransformMode();
 }
+REGISTER_COMMAND(ViewerFitImageCommand)
+void ViewerFitImageCommand::execute(QGraphicsManagaView *viewer)
+{
+    viewer->fitImage();
+}

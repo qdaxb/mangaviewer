@@ -22,6 +22,7 @@
 #include <QGraphicsTextItem>
 #include <QSpinBox>
 #include "gotodialog.h"
+#include <QDesktopWidget>
 QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageIndexs(),fileManager(),rate(1),
@@ -59,14 +60,18 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     transformationMode=setting.value("transformationmode","better").toString();
     if(transformationMode=="faster")
         scrollItem->setTransformationMode(Qt::FastTransformation);
-    backgroundOpacity=std::max(0.1,setting.value("backgroundOpacity").toReal());
-    foregroundOpacity=std::max(0.1,setting.value("foregroundOpacity").toReal());
+    backgroundOpacity=std::max(0.3,setting.value("backgroundOpacity").toReal());
+    foregroundOpacity=std::max(0.7,setting.value("foregroundOpacity").toReal());
     moveDelta=setting.value("moveDelta").toReal();
     moveRate=setting.value("moveRate").toReal();
+    moveStep=setting.value("moveStep").toReal();
+    if(moveStep==0)
+        moveStep=10;
     if(!setting.value("splitPage").toBool())
     {
         pageManager->setSplitMode(PageManager::SPLIT_NONE);
     }
+
     setting.endGroup();
     setting.beginGroup("lastread");
     QString folder=setting.value("lastfolder").toString();
@@ -96,6 +101,7 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     leftAndRightButton=false;
     updateProgressBar();
     showMsg("Press 'H' for help.",5);
+    showMsg(QString("moveStep:1/")+QString::number(moveStep));
     altKey=false;
 }
 
@@ -123,7 +129,7 @@ int QGraphicsManagaView::load(QString fileorpath)
     if(file.isFile())
         index= fileManager.indexOf(file.fileName());
     if(index!=-1)
-         index=pageManager->pageIndexOfFile(index);
+        index=pageManager->pageIndexOfFile(index);
     else
         index=0;
     scrollItem->setTotalItemCount(size);
@@ -240,7 +246,7 @@ QString QGraphicsManagaView::currentPath()
 
 void QGraphicsManagaView::go(qreal step)
 {
-    scrollItem->scrollBy(0,-100);
+    scrollItem->scrollBy(0,0-(scrollItem->currentItemSize().height()/moveStep));
     scrollItem->updateView();
     updateProgressBar();
 }
@@ -390,6 +396,22 @@ void QGraphicsManagaView::toggleTransformMode()
 
 }
 
+void QGraphicsManagaView::fitImage()
+{
+    QImage *image=scrollItem->getImage(scrollItem->currentImageIndex());
+    if(image!=NULL)
+    {
+        QDesktopWidget* desktopWidget = QApplication::desktop();
+        QRect deskRect = desktopWidget->availableGeometry();
+
+        this->resize(image->size().boundedTo(deskRect.size()));
+        if(image->size().height()>deskRect.height())
+            this->move(this->x(),0);
+        if(image->size().width()>deskRect.width())
+            this->move(0,this->y());
+    }
+}
+
 void QGraphicsManagaView::hideMsg()
 {
     msgItem->setText("");
@@ -436,7 +458,7 @@ int QGraphicsManagaView::gotoDialog()
 
 void QGraphicsManagaView::back(qreal step)
 {
-    scrollItem->scrollBy(0,100);
+    scrollItem->scrollBy(0,scrollItem->currentItemSize().height()/moveStep);
     scrollItem->updateView();
     updateProgressBar();
 }
@@ -638,7 +660,18 @@ void QGraphicsManagaView::keyPressEvent(QKeyEvent *event)
 {
     if(event->key()==Qt::Key_AltGr||event->key()==Qt::Key_Alt)
         altKey=true;
-    shortcutManager->getCommand(getKeySequence(event).toString().toUpper())->execute(this);
+    QString keySequence=getKeySequence(event).toString().toUpper();
+    bool ok;
+    int tryStep=keySequence.toInt(&ok);
+    if(ok)
+    {
+        if(tryStep==0)
+            tryStep=10;
+        moveStep=tryStep;
+        showMsg(QString("moveStep:1/")+QString::number(moveStep));
+    }
+    else
+        shortcutManager->getCommand(keySequence)->execute(this);
 }
 
 void QGraphicsManagaView::closeEvent(QCloseEvent *event)
@@ -649,6 +682,7 @@ void QGraphicsManagaView::closeEvent(QCloseEvent *event)
     setting.setValue("foregroundOpacity",foregroundOpacity);
     setting.setValue("splitPage",pageManager->splitMode()==PageManager::SPLIT_AUTO);
     setting.setValue("transformationmode",transformationMode);
+    setting.setValue("moveStep",moveStep);
     setting.endGroup();
     setting.beginGroup("lastread");
     setting.setValue("lastfolder",fileManager.currentFolder());
