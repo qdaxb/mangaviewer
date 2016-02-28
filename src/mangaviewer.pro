@@ -75,7 +75,7 @@ SOURCES += filemanager.cpp \
  #   settingsdialog.cpp \
     shortcutmanager.cpp \
     gotodialog.cpp \
-    common.cpp
+    common.cpp 
 
 
 HEADERS  +=    filemanager.h \
@@ -144,7 +144,7 @@ HEADERS  +=    filemanager.h \
     qgraphicssimplebackgroundtextitem.h \
    # settingsdialog.h \
     shortcutmanager.h \
-    gotodialog.h
+    gotodialog.h 
 
 FORMS    +=  qgraphicsmanagaview.ui \
     gotodialog.ui

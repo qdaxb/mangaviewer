@@ -13,6 +13,8 @@
 #include <QDir>
 #include <QUrl>
 #include "common.h"
+
+#include <QDesktopWidget>
 ViewerCommand::ViewerCommand()
 {
 }
@@ -179,24 +181,28 @@ void ViewerToggleOntopCommand::execute(QGraphicsManagaView *viewer)
 REGISTER_COMMAND(ViewerHeightScaleUpCommand)
 void ViewerHeightScaleUpCommand::execute(QGraphicsManagaView *viewer)
 {
+    viewer->showNormal();
     viewer->resize(viewer->width(),viewer->height()*1.05);
 }
 
 REGISTER_COMMAND(ViewerHeightScaleDownCommand)
 void ViewerHeightScaleDownCommand::execute(QGraphicsManagaView *viewer)
 {
+    viewer->showNormal();
     viewer->resize(viewer->width(),viewer->height()*0.95);
 }
 
 REGISTER_COMMAND(ViewerWidthScaleDownCommand)
 void ViewerWidthScaleDownCommand::execute(QGraphicsManagaView *viewer)
 {
+    viewer->showNormal();
     viewer->resize(viewer->width()*0.95,viewer->height());
 }
 
 REGISTER_COMMAND(ViewerWidthScaleUpCommand)
 void ViewerWidthScaleUpCommand::execute(QGraphicsManagaView *viewer)
 {
+    viewer->showNormal();
     viewer->resize(viewer->width()*1.05,viewer->height());
 }
 
@@ -228,5 +234,12 @@ void ViewerTransformationModeCommand::execute(QGraphicsManagaView *viewer)
 REGISTER_COMMAND(ViewerFitImageCommand)
 void ViewerFitImageCommand::execute(QGraphicsManagaView *viewer)
 {
+    viewer->showNormal();
     viewer->fitImage();
+}
+REGISTER_COMMAND(ViewerFullImageCommand)
+void ViewerFullImageCommand::execute(QGraphicsManagaView *viewer)
+{
+    viewer->showNormal();
+    viewer->showFullScreen();
 }

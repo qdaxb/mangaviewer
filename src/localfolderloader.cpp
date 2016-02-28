@@ -33,7 +33,7 @@ QByteArray LocalFolderLoader::loadFile(QString fileName)
     file.open(QIODevice::ReadOnly);
     QByteArray array=file.readAll();
     file.close();
-    qDebug()<<fileName;
+   // qDebug()<<fileName;
     return array;
 }
 

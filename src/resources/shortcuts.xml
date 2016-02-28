@@ -1,0 +1,75 @@
+<shortcuts>
+	<shortcut command="OpenFile">
+		<key>o</key>
+		<key>MD1</key>
+		<key global="true">Ctrl+Alt+O</key>
+	</shortcut>
+	<shortcut command="NextPage">
+		<key>n</key>
+		<key>Enter</key>
+		<key>Ctrl+Wdown</key>
+	</shortcut>
+	<shortcut command="PreviousPage">
+		<key>m</key>
+		<key>Ctrl+Wup</key>
+	</shortcut>
+	<shortcut command="Go">
+		<key>Space</key>
+		<key>Wdown</key>
+		<key>Down</key>
+	</shortcut>
+	<shortcut command="Back">
+		<key>Wup</key>
+		<key>Up</key>
+		<key>Backspace</key>
+	</shortcut>
+	<shortcut command="Close">
+		<key>q</key>
+		<key>esc</key>
+	</shortcut>
+	<shortcut command="ScaleUp">
+		<key></key>
+	</shortcut>
+	<shortcut command="ScaleDown">
+		<key></key>
+	</shortcut>
+	<shortcut command="ToggleTitle">
+		<key></key>
+	</shortcut>
+	<shortcut command="HeightScaleUp">
+		<key>Shift+Wup</key>
+	</shortcut>
+	<shortcut command="HeightScaleDown">
+		<key>Shift+Wdown</key>
+	</shortcut>
+	<shortcut command="WidthScaleUp">
+		<key>Alt+Wup</key>
+	</shortcut>
+	<shortcut command="WidthScaleDown">
+		<key>Alt+Wdown</key>
+	</shortcut>
+	<shortcut command="ToggleHide">
+		<key global="true">Alt+`</key>
+	</shortcut>
+	<shortcut command="ToggleProgressBar">
+		<key>p</key>
+	</shortcut>	
+	<shortcut command="ToggleHelpMessage">
+		<key>h</key>
+	</shortcut>	
+	<shortcut command="ToggleSplitPage">
+		<key>Tab</key>
+	</shortcut>	
+	<shortcut command="GotoPage">
+		<key>g</key>
+	</shortcut>	
+	<shortcut command="TransformationMode">
+		<key>Ctrl+T</key>
+	</shortcut>	
+	<shortcut command="FitImage">
+		<key>F</key>
+	</shortcut>
+	<shortcut command="FullImage">
+		<key>Shift+F</key>
+	</shortcut>
+</shortcuts>

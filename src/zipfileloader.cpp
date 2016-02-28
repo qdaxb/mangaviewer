@@ -53,7 +53,6 @@ int ZipFileLoader::open()
     }
     else
     {
-        qDebug()<<rtn;
         return -1;
     }
 }

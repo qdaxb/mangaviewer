@@ -32,6 +32,8 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     ui->graphicsView->setScene(&scene);
     ui->graphicsView->setAcceptDrops(false);
     ui->graphicsView->setMouseTracking(true);
+    ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setMouseTracking(true);
     this->setAcceptDrops(true);
     setStyleSheet("background-color:transparent;");
@@ -80,8 +82,6 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     qreal height=setting.value("height").toReal();
     ui->progressBar->installEventFilter(this);
     setting.endGroup();
-    if((width>0)&&(height>0))
-        this->resize(width,height);
 
     scrollItem->setVisibleArea(this->width(),this->height());
     if(folder!="")
@@ -103,6 +103,9 @@ QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     showMsg("Press 'H' for help.",5);
     showMsg(QString("moveStep:1/")+QString::number(moveStep));
     altKey=false;
+
+    if((width>0)&&(height>0))
+        this->resize(width,height);
 }
 
 
@@ -169,7 +172,7 @@ void QGraphicsManagaView::mouseMoveEvent(QMouseEvent *event)
 
     }
 
-    if ((!event->buttons().testFlag(Qt::LeftButton))&&(event->buttons().testFlag(Qt::RightButton))) {
+    if ((event->buttons().testFlag(Qt::LeftButton))||(event->buttons().testFlag(Qt::RightButton))) {
 
         move(event->globalPos() - dragPosition);
 
@@ -186,10 +189,10 @@ void QGraphicsManagaView::mouseReleaseEvent(QMouseEvent *event)
 }
 void QGraphicsManagaView::mousePressEvent(QMouseEvent *event)
 {
-    if ((!event->buttons().testFlag(Qt::LeftButton))&&(event->buttons().testFlag(Qt::RightButton))) {
+    if ((event->buttons().testFlag(Qt::LeftButton))||(event->buttons().testFlag(Qt::RightButton))) {
         dragPosition = event->globalPos() - frameGeometry().topLeft();
     }
-    else if((event->buttons().testFlag(Qt::LeftButton))&&(!event->buttons().testFlag(Qt::RightButton))) {
+    if((event->buttons().testFlag(Qt::LeftButton))&&(!event->buttons().testFlag(Qt::RightButton))) {
         if(leftDblClick)
         {
             QString command=modCMD(event)+"MD1";
@@ -537,10 +540,10 @@ void QGraphicsManagaView::updateLayout()
     ui->progressBar->setFixedHeight(progressBarHeight);
     ui->progressBar->setFixedWidth(newSize.width());
     ui->progressBar->setTextVisible(progressBarHeight==18);
-    QSize size=ui->graphicsView->viewport()->size();
-    scene.setSceneRect(QRect(QPoint(0,0),size));
-    //scene.setSceneRect(QRect(QPoint(0,0),this->size()));
-    scrollItem->setVisibleArea(size.width(),size.height());
+    ui->graphicsView->viewport()->resize(newSize);
+   // scene.setSceneRect(QRect(QPoint(0,0),newSize));
+    scene.setSceneRect(QRect(QPoint(0,0),this->size()));
+    scrollItem->setVisibleArea(newSize.width(),newSize.height());
     scrollItem->prepareResize();
     scrollItem->updateView();
 }

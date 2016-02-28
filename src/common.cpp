@@ -59,7 +59,7 @@ int natureCompare(const QString &s1, const QString &s2)
 
 
         int r = QString::localeAwareCompare(c1, c2);
-        qDebug()<<c1<<c2<<s1<<s2<<r;
+
         if (r < 0)
             return -1;
         if (r > 0)
