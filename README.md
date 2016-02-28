@@ -174,12 +174,7 @@ V0.0.3  2013/06/15
 
 1、新浪微博[@蛋疼的axb][2]  
 
-2、直接在本页内评论  
-
-3、发送邮件（地址在图中）  
-
-4、[提交Bug][3]
+2、提交issue
 
 [1]: http://pan.baidu.com/s/1i9C9S
 [2]: http://weibo.com/2baxb
-[3]: http://qdaxb.me/bug
