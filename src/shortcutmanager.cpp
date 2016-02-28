@@ -22,7 +22,11 @@ void ShortcutManager::loadFromXmlFile(QString fileName)
     QDomDocument doc("shortcut");
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug()<<"error load shortcut file";
+        qDebug()<<file.fileName();
         return;
+    }
     if (!doc.setContent(&file)) {
         file.close();
         return;
