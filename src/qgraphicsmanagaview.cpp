@@ -23,6 +23,11 @@
 #include <QSpinBox>
 #include "gotodialog.h"
 #include <QDesktopWidget>
+
+#ifdef Q_OS_MACX
+    #include <cstdlib>
+#endif
+
 QGraphicsManagaView::QGraphicsManagaView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::QGraphicsManagaView),scene(),pageViewers(),pageIndexs(),fileManager(),rate(1),
