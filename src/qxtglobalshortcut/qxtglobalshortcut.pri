@@ -15,4 +15,4 @@ win32{
 #LIBS +=-lX11
 #}
 mac:SOURCES += $$PWD/qxtglobalshortcut_mac.cpp
-mac:LIBS += -framework CoreFoundation
+mac:LIBS += -framework Carbon -framework CoreFoundation
